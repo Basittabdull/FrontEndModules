@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TalentFlow - Candidate Pipeline</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <style>
+        :root, body[data-theme='ocean'] {
+            --primary-color: #0891B2; /* Cyan 600 */
+            --primary-hover-color: #06B6D4; /* Cyan 500 */
+            --accent-color: #10B981;
+            --text-color-dark: #1E293B; /* Slate 800 */
+            --text-color-medium: #64748B; /* Slate 500 */
+            --text-color-light: #94A3B8; /* Slate 400 */
+            --background-color: #F8FAFC; /* Slate 50 */
+            --card-background: #FFFFFF;
+            --border-color: #E2E8F0; /* Slate 200 */
+            --danger-color: #EF4444;
+            --warning-color: #F59E0B;
+            --info-color: #3B82F6;
+            --hired-color: #8B5CF6; 
+            --selected-item-bg: #CFFAFE; /* Cyan 100 */
+            --toggle-bg: #F1F5F9; /* Slate 100 */
+        }
+
+        body[data-theme='dark'] {
+            --primary-color: #22D3EE; /* Cyan 400 */
+            --primary-hover-color: #67E8F9; /* Cyan 300 */
+            --text-color-dark: #F8FAFC; /* Slate 50 */
+            --text-color-medium: #94A3B8; /* Slate 400 */
+            --text-color-light: #64748B; /* Slate 500 */
+            --background-color: #0F172A; /* Slate 900 */
+            --card-background: #1E293B; /* Slate 800 */
+            --border-color: #334155; /* Slate 700 */
+            --selected-item-bg: #164E63; /* Cyan 900 */
+            --toggle-bg: #334155; /* Slate 700 */
+        }
+        
+        body[data-theme='indigo'] {
+            --primary-color: #4F46E5;
+            --primary-hover-color: #4338CA;
+            --text-color-dark: #111827;
+            --background-color: #F9FAFB;
+            --card-background: #FFFFFF;
+            --border-color: #E5E7EB;
+            --selected-item-bg: #EEF2FF;
+            --toggle-bg: #F3F4F6;
+        }
+
+        body[data-theme='mint'] {
+            --primary-color: #059669;
+            --primary-hover-color: #047857;
+            --background-color: #F0FDF4;
+            --card-background: #FFFFFF;
+            --border-color: #D1FAE5;
+            --selected-item-bg: #D1FAE5;
+            --toggle-bg: #D1FAE5;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { font-size: 16px; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color-dark);
+            line-height: 1.6;
+            overflow: hidden; 
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .app-container { display: flex; flex-direction: column; height: 100vh; }
+
+        /* --- Header & Footer --- */
+        .main-header, .main-footer {
+            flex-shrink: 0;
+            padding: 16px 24px;
+            border-color: var(--border-color);
+            background-color: var(--card-background);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .main-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
+        .logo { font-weight: 700; font-size: 1.25rem; display: flex; align-items: center; gap: 8px; color: var(--primary-color); }
+        .header-actions { display: flex; align-items: center; gap: 16px; }
+        .main-footer { text-align: center; font-size: 0.875rem; color: var(--text-color-medium); border-top: 1px solid var(--border-color); }
+        .main-footer a { color: var(--text-color-medium); text-decoration: none; margin: 0 8px; }
+        .main-footer a:hover { color: var(--primary-color); }
+
+        /* --- Theme Switcher & Modals --- */
+        .theme-switcher { position: relative; }
+        #theme-btn { background: none; border: none; cursor: pointer; color: var(--text-color-medium); padding: 4px;}
+        #theme-dropdown { position: absolute; top: 140%; right: 0; background-color: var(--card-background); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 8px; display: none; width: 150px; z-index: 1001; }
+        #theme-dropdown.show { display: block; }
+        .theme-option { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 6px; cursor: pointer; }
+        .theme-option:hover { background-color: var(--background-color); }
+        .theme-swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--border-color); }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; padding: 16px; }
+        .modal-overlay.show { display: flex; opacity: 1; }
+        .modal-content { background-color: var(--card-background); padding: 24px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); width: 100%; max-width: 500px; position: relative; transform: scale(0.95); transition: transform 0.3s ease; }
+        .modal-overlay.show .modal-content { transform: scale(1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .modal-header h2 { font-size: 1.25rem; }
+        .close-btn { background: none; border: none; color: var(--text-color-light); cursor: pointer; padding: 4px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-weight: 500; font-size: 0.875rem; margin-bottom: 4px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--background-color); color: var(--text-color-dark); font-size: 1rem; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+        
+        .resume-upload-area { border: 2px dashed var(--border-color); border-radius: 8px; padding: 24px; text-align: center; background-color: var(--background-color); color: var(--text-color-medium); cursor: pointer; margin-top: 16px; transition: border-color 0.2s; }
+        .resume-upload-area:hover, .resume-upload-area.dragover { border-color: var(--primary-color); }
+        .resume-upload-area i { width: 32px; height: 32px; color: var(--primary-color); margin-bottom: 8px; }
+        .resume-upload-area p span { color: var(--primary-color); font-weight: 500; }
+        #resume-file-name { margin-top: 8px; font-style: italic; color: var(--text-color-medium); }
+
+        /* --- Main Content Layout --- */
+        .main-content { position: relative; display: flex; flex-grow: 1; overflow: hidden; }
+        .master-view { width: 40%; max-width: 500px; min-width: 400px; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; background-color: var(--card-background); transition: all 0.3s; }
+        .detail-view { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--background-color); }
+        .detail-view-placeholder { display: flex; align-items: center; justify-content: center; height: 100%; flex-direction: column; gap: 16px; color: var(--text-color-light); text-align: center; padding: 24px; }
+        .placeholder-content { max-width: 400px; }
+        .placeholder-content h2 { color: var(--text-color-dark); }
+
+        /* --- Master View Controls --- */
+        .master-header { padding: 20px; flex-shrink: 0; border-bottom: 1px solid var(--border-color); transition: all 0.3s; }
+        .master-title-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .master-title-bar h2 { font-size: 1.25rem; }
+        .filter-bar { display: flex; gap: 12px; align-items: center; }
+        #job-filter { flex-grow: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--card-background); color: var(--text-color-dark); transition: all 0.3s; font-size: 1rem; }
+        .view-toggle { display: flex; background-color: var(--toggle-bg); border-radius: 8px; padding: 4px; }
+        .view-toggle button { background: transparent; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; color: var(--text-color-medium); }
+        .view-toggle button.active { background-color: var(--card-background); color: var(--text-color-dark); box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); }
+
+        /* --- Candidate List --- */
+        .candidate-list-container { overflow-y: auto; flex-grow: 1; }
+        .candidate-list-item { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: all 0.3s; }
+        .candidate-list-item-main { flex-grow: 1; display: flex; align-items: center; gap: 16px; }
+        .candidate-list-item:hover { background-color: var(--background-color); }
+        .candidate-list-item.selected { background-color: var(--selected-item-bg); }
+        .candidate-checkbox { width: 18px; height: 18px; accent-color: var(--primary-color); }
+        .score-visual { position: relative; width: 52px; height: 52px; flex-shrink: 0; }
+        .score-visual svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .score-visual .bg-circle { stroke: var(--border-color); }
+        .score-visual .progress-circle { stroke: var(--primary-color); transition: all 0.5s ease; }
+        .score-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.9rem; font-weight: 600; }
+        .candidate-info h3 { font-size: 1rem; font-weight: 600; }
+        .candidate-info p { font-size: 0.875rem; color: var(--text-color-medium); }
+
+        /* --- Bulk Actions Bar --- */
+        #bulk-actions-bar { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background-color: var(--text-color-dark); color: white; padding: 12px 24px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 24px; transition: bottom 0.3s ease-in-out; z-index: 500; }
+        #bulk-actions-bar.visible { bottom: 24px; }
+        #bulk-actions-bar button { background: transparent; border: none; color: white; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        
+        /* --- Kanban View --- */
+        #kanban-view { padding: 20px; overflow-y: auto; }
+        .kanban-column { margin-bottom: 20px; }
+        .kanban-column-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .kanban-column-title { font-weight: 600; }
+        .kanban-column-count { font-size: 0.875rem; background-color: var(--border-color); color: var(--text-color-medium); padding: 2px 8px; border-radius: 8px; font-weight: 600; }
+        .kanban-cards { min-height: 50px; display: grid; gap: 8px; }
+        .kanban-card { display: flex; align-items: center; gap: 12px; background: var(--card-background); padding: 12px; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: grab; }
+        .kanban-card .candidate-avatar { width: 36px; height: 36px; border-radius: 50%; background-color: var(--info-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 0.875rem; }
+        .kanban-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .sortable-ghost { opacity: 0.4; }
+        
+        /* --- Detail View --- */
+        .detail-header { padding: 24px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; background: var(--card-background); transition: all 0.3s; }
+        .detail-header-main { display: flex; gap: 16px; align-items: center; margin-bottom: 16px; }
+        .detail-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--info-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 600; }
+        .detail-header h2 { font-size: 1.25rem; }
+        .detail-header p { color: var(--text-color-medium); }
+        .detail-actions { display: flex; justify-content: space-between; align-items: center; }
+        .detail-body { flex-grow: 1; overflow-y: auto; padding: 24px; }
+        .detail-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 24px; }
+        .tab-btn { padding: 8px 16px; border: none; background: none; cursor: pointer; color: var(--text-color-medium); border-bottom: 2px solid transparent; }
+        .tab-btn.active { color: var(--primary-color); border-bottom-color: var(--primary-color); font-weight: 600; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .content-section { background: var(--card-background); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 24px; }
+        .content-section h3 { font-size: 1.125rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .scorecard-grid { display: grid; gap: 16px; }
+        .insight-item { display: flex; align-items: center; gap: 12px; font-size: 0.9rem; }
+        .insight-item i { color: var(--primary-color); }
+        .resume-placeholder { min-height: 400px; border: 2px dashed var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-color-light); }
+        .activity-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-color); }
+        .activity-item:last-child { border-bottom: none; }
+        .activity-icon { width: 32px; height: 32px; border-radius: 50%; background: var(--background-color); display: flex; align-items: center; justify-content: center; }
+        .activity-details p strong { font-weight: 600; }
+        .activity-details .timestamp { font-size: 0.8rem; color: var(--text-color-light); }
+        .link-container { display: flex; }
+        .link-container input { flex-grow: 1; border: 1px solid var(--border-color); padding: 10px 12px; border-radius: 8px 0 0 8px; background-color: var(--background-color); color: var(--text-color-medium); border-right: none; }
+        .btn-copy { display: inline-flex; align-items: center; justify-content: center; padding: 0 16px; border: 1px solid var(--border-color); border-radius: 0 8px 8px 0; background-color: var(--card-background); cursor: pointer; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border: 1px solid transparent; border-radius: 8px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover-color); }
+        .btn-secondary { background-color: var(--card-background); color: var(--text-color-medium); border-color: var(--border-color); }
+        .btn-secondary:hover { background-color: var(--background-color); }
+        .btn-subtle { background: none; color: var(--text-color-medium); }
+        .btn-subtle:hover { background-color: var(--toggle-bg); color: var(--text-color-dark); }
+        
+        #back-to-list-btn { display: none; }
+
+
+        /* --- Responsive Design --- */
+        @media (max-width: 850px) {
+            .master-view {
+                width: 100%;
+                max-width: 100%;
+                min-width: 100%;
+                position: absolute;
+                height: 100%;
+                transform: translateX(0);
+                z-index: 10;
+                transition: transform 0.3s ease-in-out;
+            }
+            .detail-view {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                transform: translateX(100%);
+                z-index: 20;
+                transition: transform 0.3s ease-in-out;
+            }
+            .main-content.detail-view-active .master-view {
+                transform: translateX(-100%);
+            }
+            .main-content.detail-view-active .detail-view {
+                transform: translateX(0);
+            }
+            #back-to-list-btn {
+                display: inline-flex;
+            }
+            .detail-header h2 {
+                font-size: 1.1rem;
+            }
+             #kanban-view {
+                display: block;
+            }
+            #kanban-board {
+                grid-auto-flow: row;
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 480px) {
+            html { font-size: 14px; }
+            .main-header, .main-footer { padding: 12px 16px; }
+            .logo { font-size: 1.1rem; }
+            .btn { padding: 10px 12px; font-size: 0.9rem; }
+            .btn span { display: none; }
+            #create-btn {
+                width: 40px; height: 40px;
+                justify-content: center;
+                border-radius: 50%;
+            }
+            .detail-actions { flex-direction: column; align-items: stretch; gap: 12px; }
+        }
+
+    </style>
+</head>
+<body data-theme="ocean">
+    <div class="app-container">
+        <header class="main-header">
+            <div class="logo">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <span>TalentFlow</span>
+            </div>
+             <div class="header-actions">
+                <button id="create-btn" class="btn btn-primary"><i data-lucide="plus"></i> <span>Create</span></button>
+                <div class="theme-switcher">
+                    <button id="theme-btn" title="Change theme"><i data-lucide="palette"></i></button>
+                    <div id="theme-dropdown">
+                        <div class="theme-option" data-theme-value="ocean"><span class="theme-swatch" style="background-color: #0891B2;"></span> Ocean</div>
+                        <div class="theme-option" data-theme-value="indigo"><span class="theme-swatch" style="background-color: #4F46E5;"></span> Indigo</div>
+                        <div class="theme-option" data-theme-value="dark"><span class="theme-swatch" style="background-color: #1F2937;"></span> Dark</div>
+                        <div class="theme-option" data-theme-value="mint"><span class="theme-swatch" style="background-color: #059669;"></span> Mint</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content" id="main-content">
+            <div class="master-view">
+                <div class="master-header">
+                     <div class="master-title-bar">
+                         <h2 style="font-size: 1.25rem;">Candidates</h2>
+                         <button id="add-candidate-btn" class="btn btn-subtle"><i data-lucide="user-plus"></i> Add</button>
+                    </div>
+                    <div class="filter-bar">
+                        <select id="job-filter">
+                            <option selected>Senior Python Developer</option>
+                            <option>Frontend Engineer</option>
+                        </select>
+                        <div class="view-toggle">
+                            <button id="list-view-btn" class="active"><i data-lucide="list"></i></button>
+                            <button id="kanban-view-btn"><i data-lucide="layout-grid"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div id="list-view" class="candidate-list-container"></div>
+                <div id="kanban-view" class="candidate-list-container" style="display:none;"></div>
+            </div>
+            <div class="detail-view" id="detail-view-content">
+                 <div class="detail-view-placeholder" id="detail-view-placeholder">
+                    <div class="placeholder-content">
+                        <i data-lucide="inbox" style="width: 48px; height: 48px; color: var(--primary-color);"></i>
+                        <h2 style="margin-top: 16px;">Welcome to your pipeline!</h2>
+                        <p>Select a candidate from the list to see their detailed profile, resume, and activity timeline here.</p>
+                        <div style="margin-top: 24px; display:flex; gap: 12px; justify-content: center;">
+                            <button id="placeholder-add-candidate-btn" class="btn btn-primary"><i data-lucide="user-plus"></i> Add First Candidate</button>
+                            <button id="placeholder-create-job-btn" class="btn btn-secondary"><i data-lucide="briefcase"></i> Create a New Job</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="main-footer">
+            <a href="#">About</a> &bull; <a href="#">Support</a> &bull; <a href="#">Privacy Policy</a> &bull; &copy; 2025 TalentFlow
+        </footer>
+    </div>
+    
+    <div id="bulk-actions-bar">
+        <span id="selection-count"></span>
+        <button id="bulk-approve"><i data-lucide="check-circle-2"></i>Approve</button>
+        <button id="bulk-reject"><i data-lucide="x-circle"></i>Reject</button>
+        <button id="bulk-hold"><i data-lucide="pause-circle"></i>On Hold</button>
+    </div>
+
+    <!-- MODALS -->
+    <div id="add-candidate-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Candidate</h2>
+                <button class="close-btn"><i data-lucide="x"></i></button>
+            </div>
+            <form id="add-candidate-form">
+                <div class="form-group"><label for="first-name">First Name</label><input type="text" id="first-name"></div>
+                <div class="form-group"><label for="last-name">Last Name</label><input type="text" id="last-name"></div>
+                <div class="form-group"><label for="email">Email Address</label><input type="email" id="email"></div>
+                
+                <div class="form-group">
+                    <label>Resume</label>
+                    <div class="resume-upload-area" id="resume-drop-area">
+                        <input type="file" id="resume-file-input" hidden accept=".pdf,.doc,.docx,.txt">
+                        <i data-lucide="upload-cloud"></i>
+                        <p><span>Click to upload</span> or drag and drop</p>
+                        <p id="resume-file-name"></p>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary close-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Candidate</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="create-job-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div id="create-job-form-view">
+                <div class="modal-header">
+                    <h2>Create New Job Posting</h2>
+                    <button class="close-btn"><i data-lucide="x"></i></button>
+                </div>
+                <form id="create-job-form">
+                    <div class="form-group"><label for="job-title">Job Title</label><input type="text" id="job-title" placeholder="e.g. Senior Python Developer"></div>
+                    <div class="form-group"><label for="location">Location</label><input type="text" id="location" placeholder="e.g. Remote"></div>
+                    <div class="form-group"><label for="job-description">Description</label><textarea id="job-description" rows="4"></textarea></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary close-btn">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Job</button>
+                    </div>
+                </form>
+            </div>
+            <div id="create-job-success-view" style="display: none;">
+                 <div class="modal-header">
+                    <h2>Success!</h2>
+                    <button class="close-btn"><i data-lucide="x"></i></button>
+                </div>
+                <p style="text-align:center; margin: 24px 0;">Your new job has been posted.</p>
+                <div class="form-group">
+                    <label>Sharable Job Link</label>
+                    <div class="link-container">
+                        <input id="job-link-input" type="text" value="https://talentflow.dev/jobs/1a2b3c" readonly>
+                        <button type="button" class="btn-copy" id="copy-link-btn"><i data-lucide="copy"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DATA & STATE ---
+        let selectedCandidateId = null;
+        let selectedCandidateIds = new Set();
+        const candidatesData = [
+            { id: 1, name: 'Aisha Sharma', email: 'aisha.sharma@example.com', score: 92, status: 'Interview', last_activity: 'Emailed 2 days ago', insights: ['Top 5% of Applicants', '10+ Years Experience', 'Led a team of 5'], activity: [{type: 'mail', content: 'Sent screening questions.', time: '2 days ago'}], resume: `Aisha Sharma - Senior Software Engineer\n\nExperience:\n- 12 years in Python development.\n- Led a team of 5 engineers at TechCorp.\n- Specialized in Django and Flask frameworks.\n- Implemented scalable microservices architecture.` },
+            { id: 2, name: 'Benjamin Carter', email: 'ben.carter@example.com', score: 88, status: 'Awaiting', last_activity: 'Applied 1 day ago', insights: ['Strong Python Skills', 'Experience with AWS', 'Open Source Contributor'], activity: [{type: 'file-text', content: 'Submitted application.', time: '1 day ago'}], resume: `Benjamin Carter - Python Developer\n\nSkills:\n- Python, Django, AWS, Docker.\n- Contributor to the open-source library 'PyRequest'.\n- 5 years of experience building web applications.`},
+            { id: 3, name: 'Chloe Rodriguez', email: 'chloe.r@example.com', score: 85, status: 'Interview', last_activity: 'Interview scheduled', insights: ['Great Communication Skills', 'Project Management Cert.', 'Bilingual (English/Spanish)'], activity: [{type: 'calendar-check', content: 'Scheduled for technical interview.', time: '4 hours ago'}], resume: `Chloe Rodriguez - Software Engineer\n\nSummary:\nA bilingual software engineer with a PMP certification. Experience in agile methodologies and leading client-facing projects.`},
+            { id: 4, name: 'David Lee', email: 'david.lee@example.com', score: 95, status: 'Hired', last_activity: 'Offer accepted', insights: ['Exceptional problem-solver', 'Perfect Culture Fit', 'Internal Referral'], activity: [{type: 'file-check-2', content: 'Offer accepted.', time: '1 week ago'}], resume: `David Lee - Full-Stack Developer\n\nReferred by Jane Doe. Proven track record of delivering high-quality code. Expert in Python and React.` },
+            { id: 5, name: 'Eva Chen', email: 'eva.chen@example.com', score: 78, status: 'On Hold', last_activity: 'Awaiting feedback', insights: ['Needs Visa Sponsorship', 'Strong Frontend Skills', 'Good Portfolio'], activity: [{type: 'clock', content: 'Moved to On Hold pending feedback.', time: '3 days ago'}], resume: `Eva Chen - Frontend Developer\n\nSkills:\n- React, Vue.js, TypeScript.\n- Designed and built responsive user interfaces for SaaS products.\n- Seeking H1-B visa sponsorship.` },
+        ];
+        const pipelineStages = { 'Awaiting': { title: 'Awaiting Review' }, 'Interview': { title: 'Interview' }, 'On Hold': { title: 'On Hold' }, 'Hired': { title: 'Hired' }, };
+
+        // --- DOM Elements ---
+        const mainContent = document.getElementById('main-content');
+        const listView = document.getElementById('list-view');
+        const kanbanView = document.getElementById('kanban-view');
+        const detailViewContent = document.getElementById('detail-view-content');
+        const detailViewPlaceholder = document.getElementById('detail-view-placeholder');
+        const addCandidateModal = document.getElementById('add-candidate-modal');
+        const createJobModal = document.getElementById('create-job-modal');
+        const bulkActionsBar = document.getElementById('bulk-actions-bar');
+        const selectionCountEl = document.getElementById('selection-count');
+
+        // --- RENDER FUNCTIONS ---
+        const getInitials = (name) => name.split(' ').map(n => n[0]).join('');
+        
+        function renderListView() {
+            listView.innerHTML = '';
+            candidatesData.forEach(c => {
+                const item = document.createElement('div');
+                item.className = `candidate-list-item ${c.id === selectedCandidateId ? 'selected' : ''}`;
+                item.dataset.id = c.id;
+                const circumference = 2 * Math.PI * 24; const offset = circumference - (c.score / 100) * circumference;
+                item.innerHTML = `<input type="checkbox" class="candidate-checkbox" data-id="${c.id}" ${selectedCandidateIds.has(c.id) ? 'checked' : ''}><div class="candidate-list-item-main"><div class="score-visual"><svg><circle class="bg-circle" cx="26" cy="26" r="24" fill="none" stroke-width="4"></circle><circle class="progress-circle" cx="26" cy="26" r="24" fill="none" stroke-width="4" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" stroke-linecap="round"></circle></svg><div class="score-text">${c.score}%</div></div><div class="candidate-info"><h3>${c.name}</h3><p>${c.last_activity}</p></div></div>`;
+                item.querySelector('.candidate-list-item-main').addEventListener('click', () => selectCandidate(c.id));
+                item.querySelector('.candidate-checkbox').addEventListener('change', (e) => handleCheckboxChange(e, c.id));
+                listView.appendChild(item);
+            });
+        }
+        
+        function renderKanbanView() {
+             kanbanView.innerHTML = '';
+            for (const stageKey in pipelineStages) { const column = document.createElement('div'); column.className = 'kanban-column'; column.innerHTML = `<div class="kanban-column-header"><span class="kanban-column-title">${pipelineStages[stageKey].title}</span><span class="kanban-column-count" id="count-${stageKey}">0</span></div><div class="kanban-cards" id="kanban-${stageKey}" data-stage="${stageKey}"></div>`; kanbanView.appendChild(column); }
+            candidatesData.forEach(c => { const kanbanColumn = document.getElementById(`kanban-${c.status}`); if (kanbanColumn) { const card = document.createElement('div'); card.className = 'kanban-card'; card.dataset.id = c.id; card.innerHTML = `<div class="kanban-card-avatar" style="background-color: ${c.status === 'Hired' ? 'var(--hired-color)' : 'var(--info-color)'}">${getInitials(c.name)}</div><div><h4 style="font-weight: 500">${c.name}</h4><p style="font-size: 0.8rem; color: var(--text-color-medium)">${c.score}% Match</p></div>`; card.addEventListener('click', () => selectCandidate(c.id)); kanbanColumn.appendChild(card); } });
+            updateKanbanCounts(); setupDragAndDrop();
+        }
+
+        function renderDetailView(candidate) {
+            detailViewPlaceholder.style.display = 'none';
+            detailViewContent.innerHTML = '';
+            const activityHTML = candidate.activity.map(a => `<div class="activity-item"><div class="activity-icon"><i data-lucide="${a.type}"></i></div><div class="activity-details"><p><strong>${a.type.charAt(0).toUpperCase() + a.type.slice(1).replace(/-/g, ' ')}</strong>: ${a.content}</p><p class="timestamp">${a.time}</p></div></div>`).join('');
+
+            const detailFragment = document.createRange().createContextualFragment(`
+                <div class="detail-header">
+                    <div class="detail-header-main">
+                        <button id="back-to-list-btn" class="btn btn-subtle"><i data-lucide="arrow-left"></i></button>
+                        <div class="detail-avatar" style="background-color: ${candidate.status === 'Hired' ? 'var(--hired-color)' : 'var(--info-color)'}">${getInitials(candidate.name)}</div>
+                        <div> <h2>${candidate.name}</h2> <p>${candidate.email}</p> </div>
+                    </div>
+                    <div class="detail-actions">
+                        <select class="btn btn-secondary" id="stage-selector"> ${Object.keys(pipelineStages).map(s => `<option value="${s}" ${candidate.status === s ? 'selected' : ''}>${pipelineStages[s].title}</option>`).join('')} </select>
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary"><i data-lucide="mail"></i> <span>Email</span></button>
+                            <button class="btn btn-primary"><i data-lucide="calendar-plus"></i> <span>Schedule</span></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-body">
+                    <div class="detail-tabs">
+                        <button class="tab-btn active" data-tab="overview">Overview</button>
+                        <button class="tab-btn" data-tab="resume">Resume</button>
+                        <button class="tab-btn" data-tab="activity">Activity</button>
+                    </div>
+                    <div id="overview" class="tab-content active"> <div class="content-section"><h3>Key Insights</h3><div class="scorecard-grid">${candidate.insights.map(i => `<div class="insight-item"><i data-lucide="check-circle-2"></i><span>${i}</span></div>`).join('')}</div></div> </div>
+                    <div id="resume" class="tab-content"><div class="content-section"><h3>Resume</h3><div class="resume-placeholder"><p style="white-space: pre-wrap;">${candidate.resume}</p></div></div></div>
+                    <div id="activity" class="tab-content"><div class="content-section"><h3>Timeline</h3>${activityHTML}</div></div>
+                </div>
+            `);
+            detailViewContent.appendChild(detailFragment);
+            detailViewContent.querySelector('#stage-selector').addEventListener('change', (e) => updateCandidateStatus(e.target.value, [candidate.id]));
+            detailViewContent.querySelector('#back-to-list-btn').addEventListener('click', () => mainContent.classList.remove('detail-view-active'));
+            lucide.createIcons();
+            setupTabListeners();
+        }
+        
+        function selectCandidate(id) {
+            selectedCandidateId = id;
+            const candidate = candidatesData.find(c => c.id === id);
+            if (candidate) {
+                mainContent.classList.add('detail-view-active');
+                renderDetailView(candidate);
+                renderListView();
+            }
+        }
+        
+        function updateCandidateStatus(newStatus, idsToUpdate) {
+            const idArray = Array.from(idsToUpdate);
+            idArray.forEach(id => {
+                const candidate = candidatesData.find(c => c.id === id);
+                if (candidate) {
+                    if (candidate.status !== 'Hired' && newStatus === 'Hired') triggerConfetti();
+                    candidate.status = newStatus;
+                }
+            });
+            renderAllViews();
+            if (idArray.length === 1 && selectedCandidateId === idArray[0]) {
+                 const currentCandidate = candidatesData.find(c => c.id === selectedCandidateId);
+                 renderDetailView(currentCandidate);
+            }
+        }
+        function handleCheckboxChange(event, id) { event.stopPropagation(); if (event.target.checked) { selectedCandidateIds.add(id); } else { selectedCandidateIds.delete(id); } updateBulkActionsBar(); }
+        function updateBulkActionsBar() { const count = selectedCandidateIds.size; if (count > 0) { selectionCountEl.textContent = `${count} selected`; bulkActionsBar.classList.add('visible'); } else { bulkActionsBar.classList.remove('visible'); } }
+        function clearSelections() { selectedCandidateIds.clear(); renderListView(); updateBulkActionsBar(); }
+        function setupTabListeners() { const tabs = document.querySelectorAll('.tab-btn'); const contents = document.querySelectorAll('.tab-content'); tabs.forEach(tab => tab.addEventListener('click', () => { tabs.forEach(t => t.classList.remove('active')); tab.classList.add('active'); contents.forEach(c => c.classList.remove('active')); document.getElementById(tab.dataset.tab).classList.add('active'); })); }
+        function updateKanbanCounts() { Object.keys(pipelineStages).forEach(stageKey => { const count = candidatesData.filter(c => c.status === stageKey).length; const countEl = document.getElementById(`count-${stageKey}`); if(countEl) countEl.textContent = count; }); }
+        function setupDragAndDrop() { const columns = document.querySelectorAll('.kanban-cards'); columns.forEach(col => new Sortable(col, { group: 'candidates', animation: 150, ghostClass: 'sortable-ghost', onEnd: (evt) => updateCandidateStatus(evt.to.dataset.stage, [parseInt(evt.item.dataset.id)]) })); }
+        function triggerConfetti() { confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } }); }
+        function renderAllViews() { renderListView(); renderKanbanView(); }
+        
+        // Bulk Actions Logic
+        document.getElementById('bulk-approve').addEventListener('click', () => { updateCandidateStatus('Interview', selectedCandidateIds); clearSelections(); });
+        document.getElementById('bulk-reject').addEventListener('click', () => { updateCandidateStatus('Rejected', selectedCandidateIds); clearSelections(); }); // Note: No 'Rejected' stage in data, for demo purposes.
+        document.getElementById('bulk-hold').addEventListener('click', () => { updateCandidateStatus('On Hold', selectedCandidateIds); clearSelections(); });
+
+        // --- THEME SWITCHER LOGIC ---
+        const themeBtn = document.getElementById('theme-btn');
+        const themeDropdown = document.getElementById('theme-dropdown');
+        const themeOptions = document.querySelectorAll('.theme-option');
+        function setTheme(theme) { document.body.dataset.theme = theme; localStorage.setItem('talentflow-theme', theme); }
+        themeBtn.addEventListener('click', (e) => { e.stopPropagation(); themeDropdown.classList.toggle('show'); });
+        themeOptions.forEach(option => option.addEventListener('click', () => { setTheme(option.dataset.themeValue); }));
+        window.addEventListener('click', () => themeDropdown.classList.remove('show'));
+        const savedTheme = localStorage.getItem('talentflow-theme') || 'ocean';
+        setTheme(savedTheme);
+
+        // --- MODAL LOGIC ---
+        const openModal = (modal) => { modal.classList.add('show'); };
+        const closeModal = (modal) => { 
+            modal.classList.remove('show');
+            if (modal.id === 'create-job-modal') { modal.querySelector('#create-job-form-view').style.display = 'block'; modal.querySelector('#create-job-success-view').style.display = 'none'; modal.querySelector('#create-job-form').reset(); }
+            if (modal.id === 'add-candidate-modal') { document.getElementById('add-candidate-form').reset(); document.getElementById('resume-file-name').textContent = ''; }
+        };
+        document.getElementById('add-candidate-btn').addEventListener('click', () => openModal(addCandidateModal));
+        document.getElementById('placeholder-add-candidate-btn').addEventListener('click', () => openModal(addCandidateModal));
+        [document.getElementById('create-btn'), document.getElementById('placeholder-create-job-btn')].forEach(btn => btn.addEventListener('click', () => openModal(createJobModal)));
+        document.querySelectorAll('.modal-overlay').forEach(modal => { modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(modal); }); modal.querySelectorAll('.close-btn').forEach(btn => btn.addEventListener('click', () => closeModal(modal))); });
+        const createJobForm = document.getElementById('create-job-form');
+        createJobForm.addEventListener('submit', (e) => { e.preventDefault(); createJobForm.parentElement.style.display = 'none'; document.getElementById('create-job-success-view').style.display = 'block'; });
+        document.getElementById('copy-link-btn').addEventListener('click', (e) => { const input = document.getElementById('job-link-input'); input.select(); document.execCommand('copy'); const btn = e.currentTarget; btn.innerHTML = '<i data-lucide="check"></i>'; lucide.createIcons(); setTimeout(() => { btn.innerHTML = '<i data-lucide="copy"></i>'; lucide.createIcons(); }, 2000); });
+        
+        // Resume Upload Logic
+        const dropArea = document.getElementById('resume-drop-area');
+        const fileInput = document.getElementById('resume-file-input');
+        const fileNameEl = document.getElementById('resume-file-name');
+        dropArea.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => dropArea.addEventListener(eventName, preventDefaults, false));
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+        ['dragenter', 'dragover'].forEach(eventName => dropArea.addEventListener(eventName, () => dropArea.classList.add('dragover')));
+        ['dragleave', 'drop'].forEach(eventName => dropArea.addEventListener(eventName, () => dropArea.classList.remove('dragover')));
+        dropArea.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files));
+        function handleFiles(files) { if (files.length > 0) fileNameEl.textContent = files[0].name; }
+
+        // VIEW TOGGLE LOGIC
+        const listViewBtn = document.getElementById('list-view-btn');
+        const kanbanViewBtn = document.getElementById('kanban-view-btn');
+        listViewBtn.addEventListener('click', () => { listView.style.display = 'block'; kanbanView.style.display = 'none'; listViewBtn.classList.add('active'); kanbanViewBtn.classList.remove('active'); });
+        kanbanViewBtn.addEventListener('click', () => { listView.style.display = 'none'; kanbanView.style.display = 'block'; kanbanViewBtn.classList.add('active'); listViewBtn.classList.remove('active'); clearSelections(); });
+
+        // --- INITIALIZE ---
+        renderAllViews();
+        lucide.createIcons();
+    });
+    </script>
+</body>
+</html>
+
