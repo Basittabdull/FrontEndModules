@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - TalentFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary-color: #0891B2;
+            --primary-hover-color: #06B6D4;
+            --text-color-dark: #1E293B;
+            --text-color-medium: #64748B;
+            --text-color-light: #94A3B8;
+            --background-color: #F8FAFC;
+            --card-background: #FFFFFF;
+            --border-color: #E2E8F0;
+            --danger-color: #EF4444;
+            --success-color: #10B981;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color-dark);
+            display: flex;
+            line-height: 1.6;
+        }
+        
+        .auth-wrapper {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .branding-panel {
+            width: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #0E7490 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+        }
+        .branding-panel .logo {
+            font-size: 2.5rem;
+            color: white;
+            margin-bottom: 16px;
+        }
+        .branding-panel h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .auth-panel {
+            width: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .auth-card {
+            background-color: var(--card-background);
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            width: 100%;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--primary-color);
+            margin-bottom: 24px;
+        }
+        
+        .auth-card h2 {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .auth-card p {
+            text-align: center;
+            color: var(--text-color-medium);
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            font-size: 0.875rem;
+            margin-bottom: 4px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            padding-right: 40px; /* Space for icon */
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--background-color);
+            color: var(--text-color-dark);
+            font-size: 1rem;
+        }
+        .form-group input[type="email"], .form-group input[type="text"] { padding-right: 12px; }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+        }
+        .password-toggle {
+            position: absolute;
+            top: 36px;
+            right: 12px;
+            cursor: pointer;
+            color: var(--text-color-light);
+        }
+        
+        .form-options {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 24px;
+        }
+        
+        .auth-link {
+            font-size: 0.875rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px 20px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-hover-color);
+        }
+        .btn-secondary {
+            background-color: var(--card-background);
+            color: var(--text-color-medium);
+            border-color: var(--border-color);
+        }
+        .btn-secondary:hover {
+            background-color: var(--background-color);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            margin: 24px 0;
+            color: var(--text-color-light);
+        }
+        .divider::before, .divider::after {
+            content: ''; flex-grow: 1; height: 1px; background-color: var(--border-color);
+        }
+        .divider span { padding: 0 16px; }
+
+        .sso-buttons { display: grid; gap: 12px; }
+
+        .error-message {
+            background-color: #FEE2E2; color: #B91C1C; padding: 12px; border-radius: 8px;
+            margin-bottom: 16px; text-align: center; font-size: 0.875rem; display: none;
+        }
+        .success-message { text-align: center; }
+        .success-icon {
+            width: 64px; height: 64px; border-radius: 50%; background-color: #D1FAE5;
+            color: var(--success-color); display: inline-flex; align-items: center;
+            justify-content: center; margin-bottom: 16px;
+        }
+
+        .auth-footer { text-align: center; margin-top: 32px; font-size: 0.875rem; color: var(--text-color-light); }
+        .auth-footer a { color: var(--text-color-medium); text-decoration: none; }
+        
+        .sub-text { text-align: center; font-size: 0.875rem; margin-top: 16px; }
+
+        .auth-view { display: none; }
+        .auth-view.active { display: block; }
+        
+        @media (max-width: 768px) {
+            .branding-panel { display: none; }
+            .auth-panel { width: 100%; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="auth-wrapper">
+        <div class="branding-panel">
+            <div class="logo">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                TalentFlow
+            </div>
+            <h1>Streamline Your Hiring</h1>
+            <p>The intelligent platform for modern recruiting teams.</p>
+        </div>
+        <div class="auth-panel">
+            <div class="auth-container">
+                <div class="auth-card">
+
+                    <!-- LOGIN VIEW -->
+                    <div id="login-view" class="auth-view active">
+                        <h2>Welcome Back</h2>
+                        <p>Sign in to your account to continue</p>
+                        <div id="login-error" class="error-message">Invalid email or password.</div>
+                        <form id="login-form">
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" value="hr@talentflow.io" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <input type="password" id="password" value="password" required>
+                                <span class="password-toggle" data-for="password"><i data-lucide="eye"></i></span>
+                            </div>
+                            <div class="form-options">
+                                <a href="#" id="forgot-password-link" class="auth-link">Forgot Password?</a>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Sign In</button>
+                        </form>
+                        <div class="divider"><span>OR</span></div>
+                        <div class="sso-buttons">
+                            <button class="btn btn-secondary sso-btn" data-provider="Google"><i data-lucide="mail"></i> Sign in with Google</button>
+                            <button class="btn btn-secondary sso-btn" data-provider="Microsoft"><i data-lucide="shield"></i> Sign in with Microsoft</button>
+                        </div>
+                        <p class="sub-text">First time? <a href="#" id="signup-link" class="auth-link">Create an Admin account</a></p>
+                    </div>
+
+                    <!-- ADMIN SIGNUP VIEW -->
+                    <div id="signup-view" class="auth-view">
+                        <h2>Create Admin Account</h2>
+                        <p>Set up your company's master account.</p>
+                        <form id="signup-form">
+                            <div class="form-group"><label for="signup-company">Company Name</label><input type="text" id="signup-company" required></div>
+                            <div class="form-group"><label for="signup-name">Full Name</label><input type="text" id="signup-name" required></div>
+                            <div class="form-group"><label for="signup-email">Email</label><input type="email" id="signup-email" required></div>
+                            <div class="form-group"><label for="signup-password">Password</label><input type="password" id="signup-password" required><span class="password-toggle" data-for="signup-password"><i data-lucide="eye"></i></span></div>
+                            <button type="submit" class="btn btn-primary">Create Account</button>
+                        </form>
+                         <p class="sub-text">Already have an account? <a href="#" class="auth-link back-to-login">Sign In</a></p>
+                    </div>
+
+                    <!-- FORGOT PASSWORD VIEW -->
+                    <div id="forgot-view" class="auth-view">
+                        <h2>Reset Password</h2>
+                        <p>Enter your email to receive a password reset link.</p>
+                        <div id="forgot-error" class="error-message">Email not found.</div>
+                        <form id="forgot-form">
+                            <div class="form-group"><label for="forgot-email">Email</label><input type="email" id="forgot-email" required></div>
+                            <button type="submit" class="btn btn-primary">Send Reset Link</button>
+                        </form>
+                        <p class="sub-text"><a href="#" class="auth-link back-to-login">Back to Sign In</a></p>
+                    </div>
+
+                    <!-- CONFIRMATION VIEW -->
+                    <div id="confirmation-view" class="auth-view">
+                        <div class="success-message">
+                            <div class="success-icon"><i data-lucide="mail-check"></i></div>
+                            <h2>Check Your Email</h2>
+                            <p>We've sent a password reset link to <strong id="confirmation-email"></strong>.</p>
+                            <p class="sub-text"><a href="#" class="auth-link back-to-login">Back to Sign In</a></p>
+                        </div>
+                    </div>
+
+                    <!-- NEW PASSWORD VIEW / FORCE CHANGE VIEW -->
+                    <div id="new-password-view" class="auth-view">
+                        <h2 id="new-password-title">Set New Password</h2>
+                        <p id="new-password-subtitle">Please enter and confirm your new password.</p>
+                        <form id="new-password-form">
+                            <div class="form-group">
+                                <label for="new-password">New Password</label>
+                                <input type="password" id="new-password" required>
+                                <span class="password-toggle" data-for="new-password"><i data-lucide="eye"></i></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm-password">Confirm Password</label>
+                                <input type="password" id="confirm-password" required>
+                                <span class="password-toggle" data-for="confirm-password"><i data-lucide="eye"></i></span>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Password</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="auth-footer">
+                    <a href="#">Terms of Service</a> &bull; <a href="#">Privacy Policy</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            const views = {
+                login: document.getElementById('login-view'),
+                signup: document.getElementById('signup-view'),
+                forgot: document.getElementById('forgot-view'),
+                confirmation: document.getElementById('confirmation-view'),
+                newPassword: document.getElementById('new-password-view'),
+            };
+
+            const showView = (viewName) => {
+                Object.values(views).forEach(view => view.classList.remove('active'));
+                views[viewName].classList.add('active');
+                lucide.createIcons();
+            };
+
+            // --- Event Listeners ---
+            document.getElementById('forgot-password-link').addEventListener('click', (e) => { e.preventDefault(); showView('forgot'); });
+            document.getElementById('signup-link').addEventListener('click', (e) => { e.preventDefault(); showView('signup'); });
+            document.querySelectorAll('.back-to-login').forEach(link => {
+                link.addEventListener('click', (e) => { e.preventDefault(); showView('login'); });
+            });
+
+            document.getElementById('login-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const loginError = document.getElementById('login-error');
+                
+                if (email === 'hr@talentflow.io' && password === 'password') {
+                    loginError.style.display = 'none';
+                    alert('Login Successful! Role: HR. Redirecting to dashboard...');
+                } else if (email === 'admin@talentflow.io' && password === 'password') {
+                    loginError.style.display = 'none';
+                    alert('Login Successful! Role: Admin. Redirecting to admin panel...');
+                } else if (email === 'hr-new@talentflow.io' && password === 'temp1234') {
+                    loginError.style.display = 'none';
+                    document.getElementById('new-password-title').textContent = 'Create Your New Password';
+                    document.getElementById('new-password-subtitle').textContent = 'For security, you must set a new password for your first login.';
+                    showView('newPassword');
+                } else {
+                    loginError.style.display = 'block';
+                }
+            });
+            
+            document.getElementById('signup-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                alert('Admin account created successfully! Please sign in.');
+                showView('login');
+            });
+
+            document.querySelectorAll('.sso-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    alert(`Simulating login with ${e.currentTarget.dataset.provider}... Success! Redirecting...`);
+                });
+            });
+
+            document.getElementById('forgot-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('forgot-email').value;
+                const forgotError = document.getElementById('forgot-error');
+                
+                if (email) {
+                    forgotError.style.display = 'none';
+                    document.getElementById('confirmation-email').textContent = email;
+                    showView('confirmation');
+                    setTimeout(() => { 
+                         document.getElementById('new-password-title').textContent = 'Set New Password';
+                         document.getElementById('new-password-subtitle').textContent = 'Please enter and confirm your new password.';
+                         showView('newPassword');
+                    }, 2000);
+                } else {
+                    forgotError.style.display = 'block';
+                }
+            });
+            
+            document.getElementById('new-password-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newPassword = document.getElementById('new-password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+
+                if (newPassword && newPassword === confirmPassword) {
+                    alert('Password has been successfully updated! Please sign in with your new password.');
+                    showView('login');
+                } else {
+                    alert('Passwords do not match. Please try again.');
+                }
+            });
+
+            // Password visibility toggle
+            document.querySelectorAll('.password-toggle').forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    const inputId = toggle.dataset.for;
+                    const input = document.getElementById(inputId);
+                    const icon = toggle.querySelector('i');
+                    if (input.type === "password") {
+                        input.type = "text";
+                        icon.setAttribute('data-lucide', 'eye-off');
+                    } else {
+                        input.type = "password";
+                        icon.setAttribute('data-lucide', 'eye');
+                    }
+                    lucide.createIcons();
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
+
