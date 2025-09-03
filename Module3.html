@@ -298,7 +298,6 @@
                 <span>TalentFlow</span>
             </div>
              <div class="header-actions">
-                <button id="create-btn" class="btn btn-primary"><i data-lucide="plus"></i> <span>Create</span></button>
                 <div class="theme-switcher">
                     <button id="theme-btn" title="Change theme"><i data-lucide="palette"></i></button>
                     <div id="theme-dropdown">
@@ -346,11 +345,7 @@
                     <div class="placeholder-content">
                         <i data-lucide="inbox" style="width: 48px; height: 48px; color: var(--primary-color);"></i>
                         <h2 style="margin-top: 16px;">Welcome to your pipeline!</h2>
-                        <p>Select a candidate from the list to see their detailed profile, resume, and activity timeline here.</p>
-                        <div style="margin-top: 24px; display:flex; gap: 12px; justify-content: center;">
-                            <button id="placeholder-add-candidate-btn" class="btn btn-primary"><i data-lucide="user-plus"></i> Add First Candidate</button>
-                            <button id="placeholder-create-job-btn" class="btn btn-secondary"><i data-lucide="briefcase"></i> Create a New Job</button>
-                        </div>
+                        <p>Select a candidate or job from the list to see their details here.</p>
                     </div>
                 </div>
             </div>
@@ -445,6 +440,14 @@
                     <input type="text" id="edit-job-title" required>
                 </div>
                 <div class="form-group">
+                    <label for="edit-job-location">Location</label>
+                    <input type="text" id="edit-job-location" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-job-description">Description</label>
+                    <textarea id="edit-job-description" rows="4"></textarea>
+                </div>
+                <div class="form-group">
                     <label for="edit-job-status">Status</label>
                     <select id="edit-job-status" class="form-group" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--background-color); color: var(--text-color-dark); font-size: 1rem;">
                         <option value="Active">Active</option>
@@ -465,13 +468,14 @@
     document.addEventListener('DOMContentLoaded', () => {
         // --- DATA & STATE ---
         let selectedCandidateId = null;
+        let selectedJobId = null;
         let selectedCandidateIds = new Set();
         let currentJobFilter = 'all';
 
         let jobsData = [
-            { id: 1, title: 'Senior Python Developer', status: 'Active', sharableLink: 'https://talentflow.dev/jobs/1a2b3c' },
-            { id: 2, title: 'Frontend Engineer', status: 'Paused', sharableLink: 'https://talentflow.dev/jobs/4d5e6f' },
-            { id: 3, title: 'Data Scientist', status: 'Closed', sharableLink: 'https://talentflow.dev/jobs/7g8h9i' }
+            { id: 1, title: 'Senior Python Developer', location: 'Remote', description: 'Seeking an experienced Python developer to build scalable web applications. Must be proficient in Django and REST APIs.', status: 'Active', sharableLink: 'https://talentflow.dev/jobs/1a2b3c' },
+            { id: 2, title: 'Frontend Engineer', location: 'New York, NY', description: 'We are looking for a creative Frontend Engineer to join our team. You will be responsible for building the client-side of our web applications.', status: 'Paused', sharableLink: 'https://talentflow.dev/jobs/4d5e6f' },
+            { id: 3, title: 'Data Scientist', location: 'San Francisco, CA', description: 'Join our data team to build models and drive insights from large datasets. Experience with machine learning is a plus.', status: 'Closed', sharableLink: 'https://talentflow.dev/jobs/7g8h9i' }
         ];
 
         let candidatesData = [
@@ -538,9 +542,11 @@
             jobsData.forEach(job => {
                 const itemCount = candidatesData.filter(c => c.jobId === job.id).length;
                 const item = document.createElement('div');
-                item.className = 'candidate-list-item'; // Reusing class for consistent styling
+                item.className = `candidate-list-item ${job.id === selectedJobId ? 'selected' : ''}`;
+                item.dataset.id = job.id;
+
                 item.innerHTML = `
-                    <div class="candidate-info" style="flex-grow: 1;">
+                    <div class="candidate-info" style="flex-grow: 1; cursor: pointer;">
                         <div style="display: flex; align-items: center; justify-content: space-between;">
                             <h3 style="margin-bottom: 4px;">${job.title}</h3>
                             <span class="job-status-badge ${job.status.toLowerCase()}">${job.status}</span>
@@ -553,16 +559,17 @@
                         <button class="btn btn-subtle btn-copy-link" data-id="${job.id}" title="Copy Link"><i data-lucide="link"></i></button>
                     </div>
                 `;
+                item.querySelector('.candidate-info').addEventListener('click', () => selectJob(job.id));
                 jobListContainer.appendChild(item);
             });
-            // Add event listeners after creating the buttons
-            jobListContainer.querySelectorAll('.btn-edit-job').forEach(btn => btn.addEventListener('click', (e) => openEditJobModal(e.currentTarget.dataset.id)));
-            jobListContainer.querySelectorAll('.btn-view-candidates').forEach(btn => btn.addEventListener('click', (e) => viewCandidatesForJob(e.currentTarget.dataset.id)));
-            jobListContainer.querySelectorAll('.btn-copy-link').forEach(btn => btn.addEventListener('click', (e) => copyJobLink(e.currentTarget)));
+
+            jobListContainer.querySelectorAll('.btn-edit-job').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); openEditJobModal(e.currentTarget.dataset.id); }));
+            jobListContainer.querySelectorAll('.btn-view-candidates').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); viewCandidatesForJob(e.currentTarget.dataset.id); }));
+            jobListContainer.querySelectorAll('.btn-copy-link').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); copyJobLink(e.currentTarget); }));
             lucide.createIcons();
         }
 
-        function renderDetailView(candidate) {
+        function renderCandidateDetailView(candidate) {
             detailViewPlaceholder.style.display = 'none';
             detailViewContent.innerHTML = '';
             const activityHTML = candidate.activity.map(a => `<div class="activity-item"><div class="activity-icon"><i data-lucide="${a.type}"></i></div><div class="activity-details"><p><strong>${a.type.charAt(0).toUpperCase() + a.type.slice(1).replace(/-/g, ' ')}</strong>: ${a.content}</p><p class="timestamp">${a.time}</p></div></div>`).join('');
@@ -599,14 +606,60 @@
             lucide.createIcons();
             setupTabListeners();
         }
+
+        function renderJobDetailView(job) {
+            detailViewPlaceholder.style.display = 'none';
+            detailViewContent.innerHTML = '';
+            const detailFragment = document.createRange().createContextualFragment(`
+                <div class="detail-header">
+                     <div class="detail-header-main">
+                        <button id="back-to-list-btn" class="btn btn-subtle"><i data-lucide="arrow-left"></i></button>
+                        <div class="detail-avatar" style="background-color: var(--primary-color);"><i data-lucide="briefcase"></i></div>
+                        <div> <h2>${job.title}</h2> <p>${job.location}</p> </div>
+                    </div>
+                </div>
+                <div class="detail-body">
+                    <div class="content-section">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+                            <h3>Job Description</h3>
+                            <span class="job-status-badge ${job.status.toLowerCase()}">${job.status}</span>
+                        </div>
+                        <p style="white-space: pre-wrap;">${job.description}</p>
+                    </div>
+                </div>
+            `);
+            detailViewContent.appendChild(detailFragment);
+            detailViewContent.querySelector('#back-to-list-btn').addEventListener('click', () => mainContent.classList.remove('detail-view-active'));
+            lucide.createIcons();
+        }
+
+        function showPlaceholder() {
+            detailViewPlaceholder.style.display = 'flex';
+            detailViewContent.innerHTML = '';
+            detailViewContent.appendChild(detailViewPlaceholder);
+        }
         
         function selectCandidate(id) {
             selectedCandidateId = id;
+            selectedJobId = null;
             const candidate = candidatesData.find(c => c.id === id);
             if (candidate) {
                 mainContent.classList.add('detail-view-active');
-                renderDetailView(candidate);
+                renderCandidateDetailView(candidate);
                 renderListView();
+                renderJobsView();
+            }
+        }
+
+        function selectJob(id) {
+            selectedJobId = id;
+            selectedCandidateId = null;
+            const job = jobsData.find(j => j.id === id);
+            if (job) {
+                mainContent.classList.add('detail-view-active');
+                renderJobDetailView(job);
+                renderListView();
+                renderJobsView();
             }
         }
         
@@ -622,7 +675,7 @@
             renderAllViews();
             if (idArray.length === 1 && selectedCandidateId === idArray[0]) {
                  const currentCandidate = candidatesData.find(c => c.id === selectedCandidateId);
-                 renderDetailView(currentCandidate);
+                 renderCandidateDetailView(currentCandidate);
             }
         }
         function handleCheckboxChange(event, id) { event.stopPropagation(); if (event.target.checked) { selectedCandidateIds.add(id); } else { selectedCandidateIds.delete(id); } updateBulkActionsBar(); }
@@ -674,14 +727,12 @@
         const openModal = (modal) => { modal.classList.add('show'); };
         const closeModal = (modal) => { 
             modal.classList.remove('show');
-            // Reset forms when closing
             const form = modal.querySelector('form');
             if (form) form.reset();
             if (modal.id === 'create-job-modal') { modal.querySelector('#create-job-form-view').style.display = 'block'; modal.querySelector('#create-job-success-view').style.display = 'none'; }
             if (modal.id === 'add-candidate-modal') { document.getElementById('resume-file-name').textContent = ''; }
         };
         document.getElementById('add-candidate-btn').addEventListener('click', () => openModal(addCandidateModal));
-        document.getElementById('placeholder-add-candidate-btn').addEventListener('click', () => openModal(addCandidateModal));
         document.getElementById('add-job-btn').addEventListener('click', () => openModal(createJobModal));
         document.querySelectorAll('.modal-overlay').forEach(modal => { modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(modal); }); modal.querySelectorAll('.close-btn').forEach(btn => btn.addEventListener('click', () => closeModal(modal))); });
         const createJobForm = document.getElementById('create-job-form');
@@ -707,6 +758,8 @@
             if (job) {
                 document.getElementById('edit-job-id').value = job.id;
                 document.getElementById('edit-job-title').value = job.title;
+                document.getElementById('edit-job-location').value = job.location;
+                document.getElementById('edit-job-description').value = job.description;
                 document.getElementById('edit-job-status').value = job.status;
                 openModal(editJobModal);
             }
@@ -718,9 +771,15 @@
             const job = jobsData.find(j => j.id === jobId);
             if (job) {
                 job.title = document.getElementById('edit-job-title').value;
+                job.location = document.getElementById('edit-job-location').value;
+                job.description = document.getElementById('edit-job-description').value;
                 job.status = document.getElementById('edit-job-status').value;
                 renderJobsView();
                 populateJobFilter();
+                // If the edited job was selected, re-render its detail view
+                if (job.id === selectedJobId) {
+                    renderJobDetailView(job);
+                }
             }
             closeModal(editJobModal);
         });
@@ -753,13 +812,20 @@
         kanbanViewBtn.addEventListener('click', () => { listView.style.display = 'none'; kanbanView.style.display = 'block'; kanbanViewBtn.classList.add('active'); listViewBtn.classList.remove('active'); clearSelections(); });
 
         function toggleMainView(showCandidates) {
+            if (showCandidates) {
+                selectedJobId = null;
+                if (!selectedCandidateId) showPlaceholder();
+            } else {
+                selectedCandidateId = null;
+                if (!selectedJobId) showPlaceholder();
+            }
+
             candidateTitleBar.style.display = showCandidates ? 'flex' : 'none';
             candidateFilterBar.style.display = showCandidates ? 'flex' : 'none';
             jobTitleBar.style.display = showCandidates ? 'none' : 'flex';
             jobListContainer.style.display = showCandidates ? 'none' : 'block';
 
             if (showCandidates) {
-                // Show list or kanban based on which is active
                 const isListActive = listViewBtn.classList.contains('active');
                 listView.style.display = isListActive ? 'block' : 'none';
                 kanbanView.style.display = isListActive ? 'none' : 'block';
@@ -770,6 +836,8 @@
 
             masterViewCandidatesBtn.classList.toggle('active', showCandidates);
             masterViewJobsBtn.classList.toggle('active', !showCandidates);
+            renderJobsView(); // Re-render to clear selection state
+            renderListView(); // Re-render to clear selection state
         }
 
         masterViewCandidatesBtn.addEventListener('click', () => toggleMainView(true));
