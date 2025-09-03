@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - TalentFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary-color: #0891B2;
+            --primary-hover-color: #06B6D4;
+            --text-color-dark: #1E293B;
+            --text-color-medium: #64748B;
+            --text-color-light: #94A3B8;
+            --background-color: #F8FAFC;
+            --card-background: #FFFFFF;
+            --border-color: #E2E8F0;
+            --success-color: #10B981;
+            --danger-color: #EF4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color-dark);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* --- Sidebar Navigation --- */
+        .sidebar {
+            width: 250px;
+            background-color: var(--card-background);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+        .sidebar-header {
+            margin-bottom: 32px;
+        }
+        .logo {
+            font-weight: 700;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary-color);
+        }
+        .sidebar-nav {
+            flex-grow: 1;
+        }
+        .sidebar-nav ul {
+            list-style: none;
+        }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-color-medium);
+            font-weight: 500;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .sidebar-nav a:hover {
+            background-color: var(--background-color);
+            color: var(--text-color-dark);
+        }
+        .sidebar-nav a.active {
+            background-color: #CFFAFE;
+            color: var(--primary-color);
+        }
+        .sidebar-nav a i {
+            width: 20px;
+            height: 20px;
+        }
+
+        .sidebar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        /* --- Main Content --- */
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .main-header {
+            flex-shrink: 0;
+            padding: 16px 24px;
+            background-color: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-color-dark);
+        }
+        .profile-menu {
+            position: relative;
+        }
+        #profile-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+        #profile-btn img {
+            width: 100%;
+            height: 100%;
+        }
+        #profile-dropdown {
+            position: absolute;
+            top: 120%;
+            right: 0;
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            padding: 8px;
+            display: none;
+            width: 150px;
+            z-index: 1001;
+        }
+        #profile-dropdown.show { display: block; }
+        #profile-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--text-color-medium);
+        }
+        #profile-dropdown a:hover {
+            background-color: var(--background-color);
+        }
+        
+        .main-content {
+            flex-grow: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+        
+        .page { display: none; }
+        .page.active { display: block; }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .page-header h1 {
+            font-size: 1.75rem;
+        }
+        
+        /* --- Dashboard Screen --- */
+        .stat-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+        }
+        .stat-card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .stat-card .label {
+            color: var(--text-color-medium);
+        }
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        /* --- User Management Screen --- */
+        .user-table-container {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th, td {
+            padding: 16px;
+            white-space: nowrap;
+        }
+        th {
+            background-color: var(--background-color);
+            font-weight: 500;
+            color: var(--text-color-medium);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+        td {
+            border-top: 1px solid var(--border-color);
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+        .status-badge.active {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+        .status-badge.inactive {
+            background-color: #FEF3C7;
+            color: #92400E;
+        }
+        .action-buttons button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: var(--text-color-medium);
+        }
+        .action-buttons button:hover {
+            color: var(--primary-color);
+        }
+        
+        /* Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.show { display: flex; opacity: 1; }
+        .modal-content { background-color: var(--card-background); padding: 24px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); width: 100%; max-width: 500px; position: relative; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .modal-header h2 { font-size: 1.25rem; }
+        .close-btn { background: none; border: none; color: var(--text-color-light); cursor: pointer; padding: 4px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-weight: 500; font-size: 0.875rem; margin-bottom: 4px; }
+        .form-group input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--background-color); font-size: 1rem; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 16px; border: 1px solid transparent; border-radius: 8px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-secondary { background-color: var(--card-background); color: var(--text-color-medium); border-color: var(--border-color); }
+        .btn-secondary:hover { background-color: var(--background-color); }
+
+        .main-footer {
+            flex-shrink: 0;
+            text-align: center;
+            padding: 16px;
+            font-size: 0.875rem;
+            color: var(--text-color-medium);
+            border-top: 1px solid var(--border-color);
+        }
+
+        body.sidebar-open .sidebar-overlay {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                transform: translateX(-100%);
+            }
+            body.sidebar-open .sidebar {
+                transform: translateX(0);
+            }
+            #menu-btn {
+                display: block;
+            }
+            .main-header {
+                justify-content: space-between;
+            }
+            .main-header .profile-menu {
+                margin-left: auto;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <span>TalentFlow</span>
+                </div>
+            </div>
+            <div class="sidebar-nav">
+                <ul>
+                    <li><a href="#" class="nav-link active" data-page="dashboard"><i data-lucide="layout-dashboard"></i> <span>Dashboard</span></a></li>
+                    <li><a href="#" class="nav-link" data-page="user-management"><i data-lucide="users"></i> <span>User Management</span></a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="sidebar-overlay"></div>
+
+        <div class="main-wrapper">
+            <header class="main-header">
+                <button id="menu-btn"><i data-lucide="menu"></i></button>
+                <div class="profile-menu">
+                    <button id="profile-btn">
+                        <img src="https://placehold.co/40x40/E2E8F0/4A5568?text=A" alt="Admin Profile">
+                    </button>
+                    <div id="profile-dropdown">
+                        <a href="#"><i data-lucide="log-out"></i> Logout</a>
+                    </div>
+                </div>
+            </header>
+
+            <main class="main-content">
+                <!-- SCREEN 1: DASHBOARD -->
+                <section id="dashboard-page" class="page active">
+                    <div class="page-header">
+                        <h1>Dashboard</h1>
+                    </div>
+                    <div class="stat-cards">
+                        <div class="stat-card">
+                            <p class="label">Total HR Users</p>
+                            <p class="value" id="stat-total-users">12</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="label">Active Job Postings</p>
+                            <p class="value">8</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="label">Interviews This Month</p>
+                            <p class="value">42</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SCREEN 2: USER MANAGEMENT -->
+                <section id="user-management-page" class="page">
+                    <div class="page-header">
+                        <h1>User Management</h1>
+                        <button id="add-user-btn" class="btn btn-primary"><i data-lucide="plus"></i> Add New HR User</button>
+                    </div>
+                    <div class="user-table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Company</th>
+                                    <th>Emp ID</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-table-body">
+                                <!-- User rows will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </main>
+             <footer class="main-footer">
+                <a href="#">Support</a> &bull; <a href="#">Terms of Service</a>
+            </footer>
+        </div>
+    </div>
+    
+    <!-- MODALS -->
+    <div id="add-user-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New HR User Account</h2>
+                <button class="close-btn"><i data-lucide="x"></i></button>
+            </div>
+            <form id="add-user-form">
+                <div class="form-group"><label for="first-name">First Name</label><input type="text" id="first-name" required></div>
+                <div class="form-group"><label for="last-name">Last Name</label><input type="text" id="last-name" required></div>
+                <div class="form-group"><label for="email">Email Address</label><input type="email" id="email" required></div>
+                <div class="form-group"><label for="company">Company</label><input type="text" id="company" required></div>
+                <div class="form-group"><label for="emp-id">Employee ID</label><input type="text" id="emp-id" required></div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary close-btn">Cancel</button><button type="submit" class="btn btn-primary">Create User</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="edit-user-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit HR User Account</h2>
+                <button class="close-btn"><i data-lucide="x"></i></button>
+            </div>
+            <form id="edit-user-form">
+                <input type="hidden" id="edit-user-id">
+                <div class="form-group"><label for="edit-first-name">First Name</label><input type="text" id="edit-first-name" required></div>
+                <div class="form-group"><label for="edit-last-name">Last Name</label><input type="text" id="edit-last-name" required></div>
+                <div class="form-group"><label for="edit-email">Email Address</label><input type="email" id="edit-email" required></div>
+                <div class="form-group"><label for="edit-company">Company</label><input type="text" id="edit-company" required></div>
+                <div class="form-group"><label for="edit-emp-id">Employee ID</label><input type="text" id="edit-emp-id" required></div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary close-btn">Cancel</button><button type="submit" class="btn btn-primary">Save Changes</button></div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            // --- STATE & DATA ---
+            let users = [
+                { id: 1, firstName: 'Alice', lastName: 'Johnson', email: 'alice.j@company.com', company: 'Innovate Inc.', empId: 'EMP1001', role: 'HR Manager', status: 'Active' },
+                { id: 2, firstName: 'Bob', lastName: 'Williams', email: 'bob.w@company.com', company: 'Innovate Inc.', empId: 'EMP1002', role: 'HR Generalist', status: 'Active' },
+                { id: 3, firstName: 'Charlie', lastName: 'Brown', email: 'charlie.b@company.com', company: 'Tech Solutions', empId: 'EMP2001', role: 'HR Generalist', status: 'Inactive' },
+            ];
+
+            // --- DOM ELEMENTS ---
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pages = document.querySelectorAll('.page');
+            const addUserBtn = document.getElementById('add-user-btn');
+            const addUserModal = document.getElementById('add-user-modal');
+            const addUserForm = document.getElementById('add-user-form');
+            const editUserModal = document.getElementById('edit-user-modal');
+            const editUserForm = document.getElementById('edit-user-form');
+            const userTableBody = document.getElementById('user-table-body');
+            const profileBtn = document.getElementById('profile-btn');
+            const profileDropdown = document.getElementById('profile-dropdown');
+            const menuBtn = document.getElementById('menu-btn');
+            const sidebar = document.querySelector('.sidebar');
+            const sidebarOverlay = document.querySelector('.sidebar-overlay');
+
+            // --- FUNCTIONS ---
+            function showPage(pageId) {
+                pages.forEach(page => page.classList.remove('active'));
+                document.getElementById(`${pageId}-page`).classList.add('active');
+
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.dataset.page === pageId);
+                });
+            }
+
+            function renderUserTable() {
+                userTableBody.innerHTML = '';
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.dataset.userId = user.id;
+                    const actionIcon = user.status === 'Active' ? 'user-x' : 'user-check';
+                    const actionTitle = user.status === 'Active' ? 'Deactivate' : 'Activate';
+
+                    row.innerHTML = `
+                        <td>${user.firstName} ${user.lastName}</td>
+                        <td>${user.email}</td>
+                        <td>${user.company}</td>
+                        <td>${user.empId}</td>
+                        <td>${user.role}</td>
+                        <td><span class="status-badge ${user.status.toLowerCase()}">${user.status}</span></td>
+                        <td class="action-buttons">
+                            <button title="Edit" class="edit-btn"><i data-lucide="edit"></i></button>
+                            <button title="${actionTitle}" class="toggle-status-btn"><i data-lucide="${actionIcon}"></i></button>
+                        </td>
+                    `;
+                    userTableBody.appendChild(row);
+                });
+                document.getElementById('stat-total-users').textContent = users.length;
+                lucide.createIcons();
+            }
+            
+            function openModal(modal) { modal.classList.add('show'); }
+            function closeModal(modal) { modal.classList.remove('show'); }
+
+            function openEditModal(userId) {
+                const user = users.find(u => u.id === userId);
+                if (!user) return;
+                
+                document.getElementById('edit-user-id').value = user.id;
+                document.getElementById('edit-first-name').value = user.firstName;
+                document.getElementById('edit-last-name').value = user.lastName;
+                document.getElementById('edit-email').value = user.email;
+                document.getElementById('edit-company').value = user.company;
+                document.getElementById('edit-emp-id').value = user.empId;
+                
+                openModal(editUserModal);
+            }
+            
+            function toggleUserStatus(userId) {
+                const user = users.find(u => u.id === userId);
+                if (user) {
+                    user.status = user.status === 'Active' ? 'Inactive' : 'Active';
+                    renderUserTable();
+                }
+            }
+
+
+            // --- EVENT LISTENERS ---
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showPage(link.dataset.page);
+                    if (document.body.classList.contains('sidebar-open')) {
+                        document.body.classList.remove('sidebar-open');
+                    }
+                });
+            });
+
+            addUserBtn.addEventListener('click', () => openModal(addUserModal));
+            
+            [addUserModal, editUserModal].forEach(modal => {
+                modal.querySelectorAll('.close-btn, .btn-secondary').forEach(btn => {
+                    btn.addEventListener('click', () => closeModal(modal));
+                });
+            });
+            
+            addUserForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newUser = {
+                    id: Date.now(), // More unique ID
+                    firstName: document.getElementById('first-name').value,
+                    lastName: document.getElementById('last-name').value,
+                    email: document.getElementById('email').value,
+                    company: document.getElementById('company').value,
+                    empId: document.getElementById('emp-id').value,
+                    role: 'HR Generalist',
+                    status: 'Active'
+                };
+                users.push(newUser);
+                renderUserTable();
+                addUserForm.reset();
+                closeModal(addUserModal);
+                alert('HR user created. A welcome email with a temporary password has been sent.');
+            });
+
+            editUserForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const userId = parseInt(document.getElementById('edit-user-id').value);
+                const userIndex = users.findIndex(u => u.id === userId);
+
+                if (userIndex > -1) {
+                    users[userIndex] = {
+                        ...users[userIndex],
+                        firstName: document.getElementById('edit-first-name').value,
+                        lastName: document.getElementById('edit-last-name').value,
+                        email: document.getElementById('edit-email').value,
+                        company: document.getElementById('edit-company').value,
+                        empId: document.getElementById('edit-emp-id').value,
+                    };
+                    renderUserTable();
+                    closeModal(editUserModal);
+                }
+            });
+
+            userTableBody.addEventListener('click', (e) => {
+                const editBtn = e.target.closest('.edit-btn');
+                const toggleStatusBtn = e.target.closest('.toggle-status-btn');
+                
+                if (editBtn) {
+                    const userId = parseInt(editBtn.closest('tr').dataset.userId);
+                    openEditModal(userId);
+                }
+                
+                if (toggleStatusBtn) {
+                    const userId = parseInt(toggleStatusBtn.closest('tr').dataset.userId);
+                    toggleUserStatus(userId);
+                }
+            });
+
+            profileBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('show');
+            });
+            
+            menuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.body.classList.toggle('sidebar-open');
+            });
+
+            sidebarOverlay.addEventListener('click', () => {
+                document.body.classList.remove('sidebar-open');
+            });
+
+            window.addEventListener('click', () => {
+                profileDropdown.classList.remove('show');
+            });
+
+
+            // --- INITIALIZATION ---
+            renderUserTable();
+        });
+    </script>
+</body>
+</html>
+
