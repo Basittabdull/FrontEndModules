@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root {
+        :root, body[data-theme='ocean'] {
             --primary-color: #0891B2;
             --primary-hover-color: #06B6D4;
             --text-color-dark: #1E293B;
@@ -20,6 +20,17 @@
             --border-color: #E2E8F0;
             --success-color: #10B981;
             --danger-color: #EF4444;
+        }
+
+        body[data-theme='dark'] {
+            --primary-color: #22D3EE;
+            --primary-hover-color: #67E8F9;
+            --text-color-dark: #F8FAFC;
+            --text-color-medium: #94A3B8;
+            --text-color-light: #64748B;
+            --background-color: #0F172A;
+            --card-background: #1E293B;
+            --border-color: #334155;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -121,6 +132,12 @@
             justify-content: space-between;
             align-items: center;
         }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-left:auto;
+        }
         #menu-btn {
             display: none;
             background: none;
@@ -131,6 +148,14 @@
         .profile-menu {
             position: relative;
         }
+        /* --- Theme Switcher --- */
+        .theme-switcher { position: relative; }
+        #theme-btn { background: none; border: none; cursor: pointer; color: var(--text-color-medium); padding: 4px;}
+        #theme-dropdown { position: absolute; top: 140%; right: 0; background-color: var(--card-background); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 8px; display: none; width: 150px; z-index: 1001; }
+        #theme-dropdown.show { display: block; }
+        .theme-option { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 6px; cursor: pointer; }
+        .theme-option:hover { background-color: var(--background-color); }
+        .theme-swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--border-color); }
         #profile-btn {
             background: none;
             border: none;
@@ -345,12 +370,21 @@
         <div class="main-wrapper">
             <header class="main-header">
                 <button id="menu-btn"><i data-lucide="menu"></i></button>
-                <div class="profile-menu">
-                    <button id="profile-btn">
-                        <img src="https://placehold.co/40x40/E2E8F0/4A5568?text=A" alt="Admin Profile">
-                    </button>
-                    <div id="profile-dropdown">
-                        <a href="#"><i data-lucide="log-out"></i> Logout</a>
+                <div class="header-actions">
+                    <div class="theme-switcher">
+                        <button id="theme-btn" title="Change theme"><i data-lucide="palette"></i></button>
+                        <div id="theme-dropdown">
+                            <div class="theme-option" data-theme-value="ocean"><span class="theme-swatch" style="background-color: #0891B2;"></span> Ocean</div>
+                            <div class="theme-option" data-theme-value="dark"><span class="theme-swatch" style="background-color: #1F2937;"></span> Dark</div>
+                        </div>
+                    </div>
+                    <div class="profile-menu">
+                        <button id="profile-btn">
+                            <img src="https://placehold.co/40x40/E2E8F0/4A5568?text=A" alt="Admin Profile">
+                        </button>
+                        <div id="profile-dropdown">
+                            <a href="#"><i data-lucide="log-out"></i> Logout</a>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -627,6 +661,30 @@
 
             // --- INITIALIZATION ---
             renderUserTable();
+
+            // --- THEME SWITCHER LOGIC ---
+            const themeBtn = document.getElementById('theme-btn');
+            const themeDropdown = document.getElementById('theme-dropdown');
+            const themeOptions = document.querySelectorAll('.theme-option');
+            function setTheme(theme) {
+                document.body.dataset.theme = theme;
+                localStorage.setItem('talentflow-theme', theme);
+            }
+            themeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                themeDropdown.classList.toggle('show');
+            });
+            themeOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    setTheme(option.dataset.themeValue);
+                });
+            });
+            window.addEventListener('click', () => {
+                profileDropdown.classList.remove('show');
+                themeDropdown.classList.remove('show');
+            });
+            const savedTheme = localStorage.getItem('talentflow-theme') || 'ocean';
+            setTheme(savedTheme);
         });
     </script>
 </body>
