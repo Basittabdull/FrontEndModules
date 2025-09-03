@@ -27,6 +27,12 @@
             --hired-color: #8B5CF6; 
             --selected-item-bg: #CFFAFE; /* Cyan 100 */
             --toggle-bg: #F1F5F9; /* Slate 100 */
+            --status-active-bg: #D1FAE5;
+            --status-active-text: #065F46;
+            --status-paused-bg: #FEF3C7;
+            --status-paused-text: #92400E;
+            --status-closed-bg: #F3F4F6;
+            --status-closed-text: #4B5563;
         }
 
         body[data-theme='dark'] {
@@ -40,6 +46,12 @@
             --border-color: #334155; /* Slate 700 */
             --selected-item-bg: #164E63; /* Cyan 900 */
             --toggle-bg: #334155; /* Slate 700 */
+            --status-active-bg: #059669;
+            --status-active-text: #D1FAE5;
+            --status-paused-bg: #D97706;
+            --status-paused-text: #FEF3C7;
+            --status-closed-bg: #4B5563;
+            --status-closed-text: #F3F4F6;
         }
         
         body[data-theme='indigo'] {
@@ -149,6 +161,20 @@
         .score-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.9rem; font-weight: 600; }
         .candidate-info h3 { font-size: 1rem; font-weight: 600; }
         .candidate-info p { font-size: 0.875rem; color: var(--text-color-medium); }
+
+        .job-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+        .job-status-badge.active { background-color: var(--status-active-bg); color: var(--status-active-text); }
+        .job-status-badge.paused { background-color: var(--status-paused-bg); color: var(--status-paused-text); }
+        .job-status-badge.closed { background-color: var(--status-closed-bg); color: var(--status-closed-text); }
 
         /* --- Bulk Actions Bar --- */
         #bulk-actions-bar { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background-color: var(--text-color-dark); color: white; padding: 12px 24px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 24px; transition: bottom 0.3s ease-in-out; z-index: 500; }
@@ -272,10 +298,6 @@
                 <span>TalentFlow</span>
             </div>
              <div class="header-actions">
-                <div class="view-toggle" style="margin-right: 16px;">
-                    <button id="pipeline-view-btn" class="active" title="Candidate Pipeline"><i data-lucide="users"></i></button>
-                    <button id="jobs-view-btn" title="Job Management"><i data-lucide="briefcase"></i></button>
-                </div>
                 <button id="create-btn" class="btn btn-primary"><i data-lucide="plus"></i> <span>Create</span></button>
                 <div class="theme-switcher">
                     <button id="theme-btn" title="Change theme"><i data-lucide="palette"></i></button>
@@ -290,14 +312,21 @@
         </header>
 
         <main class="main-content" id="main-content">
-            <!-- Candidate Pipeline View -->
-            <div class="master-view" id="pipeline-master-view">
+            <div class="master-view">
                 <div class="master-header">
-                     <div class="master-title-bar">
+                    <div class="view-toggle" style="margin-bottom: 16px;">
+                        <button id="master-view-candidates-btn" class="active" style="flex: 1; justify-content: center;"><i data-lucide="users"></i><span style="margin-left: 8px;">Candidates</span></button>
+                        <button id="master-view-jobs-btn" style="flex: 1; justify-content: center;"><i data-lucide="briefcase"></i><span style="margin-left: 8px;">Jobs</span></button>
+                    </div>
+                     <div id="candidate-title-bar" class="master-title-bar">
                          <h2 style="font-size: 1.25rem;">Candidates</h2>
                          <button id="add-candidate-btn" class="btn btn-subtle"><i data-lucide="user-plus"></i> Add</button>
                     </div>
-                    <div class="filter-bar">
+                    <div id="job-title-bar" class="master-title-bar" style="display: none;">
+                        <h2 style="font-size: 1.25rem;">Jobs</h2>
+                        <button id="add-job-btn" class="btn btn-subtle"><i data-lucide="plus"></i> Add</button>
+                   </div>
+                    <div id="candidate-filter-bar" class="filter-bar">
                         <select id="job-filter">
                             <option selected>Senior Python Developer</option>
                             <option>Frontend Engineer</option>
@@ -308,10 +337,11 @@
                         </div>
                     </div>
                 </div>
-                <div id="list-view" class="candidate-list-container"></div>
-                <div id="kanban-view" class="candidate-list-container" style="display:none;"></div>
+                <div id="candidate-list-view" class="candidate-list-container"></div>
+                <div id="candidate-kanban-view" class="candidate-list-container" style="display:none;"></div>
+                <div id="job-list-container" class="candidate-list-container" style="display:none;"></div>
             </div>
-            <div class="detail-view" id="pipeline-detail-view">
+            <div class="detail-view" id="detail-view-content">
                  <div class="detail-view-placeholder" id="detail-view-placeholder">
                     <div class="placeholder-content">
                         <i data-lucide="inbox" style="width: 48px; height: 48px; color: var(--primary-color);"></i>
@@ -321,28 +351,6 @@
                             <button id="placeholder-add-candidate-btn" class="btn btn-primary"><i data-lucide="user-plus"></i> Add First Candidate</button>
                             <button id="placeholder-create-job-btn" class="btn btn-secondary"><i data-lucide="briefcase"></i> Create a New Job</button>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Job Management View (Initially Hidden) -->
-            <div class="master-view" id="jobs-master-view" style="display: none;">
-                <div class="master-header">
-                     <div class="master-title-bar">
-                         <h2 style="font-size: 1.25rem;">Job Listings</h2>
-                         <button id="add-job-btn" class="btn btn-subtle"><i data-lucide="plus"></i> Add Job</button>
-                    </div>
-                </div>
-                <div class="candidate-list-container" id="job-list-container">
-                    <!-- Job list will be rendered here by JS -->
-                </div>
-            </div>
-            <div class="detail-view" id="jobs-detail-view" style="display: none;">
-                 <div class="detail-view-placeholder" id="job-detail-placeholder">
-                    <div class="placeholder-content">
-                        <i data-lucide="briefcase" style="width: 48px; height: 48px; color: var(--primary-color);"></i>
-                        <h2 style="margin-top: 16px;">Manage Jobs</h2>
-                        <p>Select a job from the list to view its details, edit the posting, and see all applicants.</p>
                     </div>
                 </div>
             </div>
@@ -432,9 +440,18 @@
             </div>
             <form id="edit-job-form">
                 <input type="hidden" id="edit-job-id">
-                <div class="form-group"><label for="edit-job-title">Job Title</label><input type="text" id="edit-job-title" required></div>
-                <div class="form-group"><label for="edit-job-location">Location</label><input type="text" id="edit-job-location" required></div>
-                <div class="form-group"><label for="edit-job-description">Description</label><textarea id="edit-job-description" rows="4" required></textarea></div>
+                <div class="form-group">
+                    <label for="edit-job-title">Job Title</label>
+                    <input type="text" id="edit-job-title" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-job-status">Status</label>
+                    <select id="edit-job-status" class="form-group" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--background-color); color: var(--text-color-dark); font-size: 1rem;">
+                        <option value="Active">Active</option>
+                        <option value="Paused">Paused</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary close-btn">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -443,19 +460,21 @@
         </div>
     </div>
 
+
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         // --- DATA & STATE ---
         let selectedCandidateId = null;
-        let selectedJobId = null;
         let selectedCandidateIds = new Set();
+        let currentJobFilter = 'all';
 
-        const jobsData = [
-            { id: 1, title: 'Senior Python Developer', location: 'Remote', description: 'Seeking an experienced Python developer to build out our backend services. The ideal candidate will have extensive knowledge of Django, Flask, and RESTful APIs.' },
-            { id: 2, title: 'Frontend Engineer', location: 'New York, NY', description: 'Join our team to build beautiful and responsive user interfaces with React. Experience with TypeScript and GraphQL is a plus.' }
+        let jobsData = [
+            { id: 1, title: 'Senior Python Developer', status: 'Active', sharableLink: 'https://talentflow.dev/jobs/1a2b3c' },
+            { id: 2, title: 'Frontend Engineer', status: 'Paused', sharableLink: 'https://talentflow.dev/jobs/4d5e6f' },
+            { id: 3, title: 'Data Scientist', status: 'Closed', sharableLink: 'https://talentflow.dev/jobs/7g8h9i' }
         ];
 
-        const candidatesData = [
+        let candidatesData = [
             { id: 1, jobId: 1, name: 'Aisha Sharma', email: 'aisha.sharma@example.com', score: 92, status: 'Interview', last_activity: 'Emailed 2 days ago', insights: ['Top 5% of Applicants', '10+ Years Experience', 'Led a team of 5'], activity: [{type: 'mail', content: 'Sent screening questions.', time: '2 days ago'}], resume: `Aisha Sharma - Senior Software Engineer\n\nExperience:\n- 12 years in Python development.\n- Led a team of 5 engineers at TechCorp.\n- Specialized in Django and Flask frameworks.\n- Implemented scalable microservices architecture.` },
             { id: 2, jobId: 1, name: 'Benjamin Carter', email: 'ben.carter@example.com', score: 88, status: 'Awaiting', last_activity: 'Applied 1 day ago', insights: ['Strong Python Skills', 'Experience with AWS', 'Open Source Contributor'], activity: [{type: 'file-text', content: 'Submitted application.', time: '1 day ago'}], resume: `Benjamin Carter - Python Developer\n\nSkills:\n- Python, Django, AWS, Docker.\n- Contributor to the open-source library 'PyRequest'.\n- 5 years of experience building web applications.`},
             { id: 3, jobId: 2, name: 'Chloe Rodriguez', email: 'chloe.r@example.com', score: 85, status: 'Interview', last_activity: 'Interview scheduled', insights: ['Great Communication Skills', 'Project Management Cert.', 'Bilingual (English/Spanish)'], activity: [{type: 'calendar-check', content: 'Scheduled for technical interview.', time: '4 hours ago'}], resume: `Chloe Rodriguez - Software Engineer\n\nSummary:\nA bilingual software engineer with a PMP certification. Experience in agile methodologies and leading client-facing projects.`},
@@ -466,38 +485,35 @@
 
         // --- DOM Elements ---
         const mainContent = document.getElementById('main-content');
-
-        // Pipeline View Elements
-        const pipelineMasterView = document.getElementById('pipeline-master-view');
-        const pipelineDetailView = document.getElementById('pipeline-detail-view');
-        const listView = document.getElementById('list-view');
-        const kanbanView = document.getElementById('kanban-view');
+        const listView = document.getElementById('candidate-list-view');
+        const kanbanView = document.getElementById('candidate-kanban-view');
+        const detailViewContent = document.getElementById('detail-view-content');
         const detailViewPlaceholder = document.getElementById('detail-view-placeholder');
-
-        // Job Management View Elements
-        const jobsMasterView = document.getElementById('jobs-master-view');
-        const jobsDetailView = document.getElementById('jobs-detail-view');
-        const jobListContainer = document.getElementById('job-list-container');
-        const jobDetailPlaceholder = document.getElementById('job-detail-placeholder');
-
-        // Shared Elements
         const addCandidateModal = document.getElementById('add-candidate-modal');
         const createJobModal = document.getElementById('create-job-modal');
         const editJobModal = document.getElementById('edit-job-modal');
-        const editJobForm = document.getElementById('edit-job-form');
         const bulkActionsBar = document.getElementById('bulk-actions-bar');
         const selectionCountEl = document.getElementById('selection-count');
+        const jobListContainer = document.getElementById('job-list-container');
+        const masterViewCandidatesBtn = document.getElementById('master-view-candidates-btn');
+        const masterViewJobsBtn = document.getElementById('master-view-jobs-btn');
+        const candidateTitleBar = document.getElementById('candidate-title-bar');
+        const jobTitleBar = document.getElementById('job-title-bar');
+        const candidateFilterBar = document.getElementById('candidate-filter-bar');
+        const candidateListView = document.getElementById('candidate-list-view');
+        const candidateKanbanView = document.getElementById('candidate-kanban-view');
+        const jobFilterSelect = document.getElementById('job-filter');
+        const editJobForm = document.getElementById('edit-job-form');
 
-        // Header View Toggles
-        const pipelineViewBtn = document.getElementById('pipeline-view-btn');
-        const jobsViewBtn = document.getElementById('jobs-view-btn');
 
         // --- RENDER FUNCTIONS ---
         const getInitials = (name) => name.split(' ').map(n => n[0]).join('');
         
         function renderListView() {
             listView.innerHTML = '';
-            candidatesData.forEach(c => {
+            const filteredCandidates = candidatesData.filter(c => currentJobFilter === 'all' || c.jobId === currentJobFilter);
+
+            filteredCandidates.forEach(c => {
                 const item = document.createElement('div');
                 item.className = `candidate-list-item ${c.id === selectedCandidateId ? 'selected' : ''}`;
                 item.dataset.id = c.id;
@@ -512,89 +528,46 @@
         function renderKanbanView() {
              kanbanView.innerHTML = '';
             for (const stageKey in pipelineStages) { const column = document.createElement('div'); column.className = 'kanban-column'; column.innerHTML = `<div class="kanban-column-header"><span class="kanban-column-title">${pipelineStages[stageKey].title}</span><span class="kanban-column-count" id="count-${stageKey}">0</span></div><div class="kanban-cards" id="kanban-${stageKey}" data-stage="${stageKey}"></div>`; kanbanView.appendChild(column); }
-            candidatesData.forEach(c => { const kanbanColumn = document.getElementById(`kanban-${c.status}`); if (kanbanColumn) { const card = document.createElement('div'); card.className = 'kanban-card'; card.dataset.id = c.id; card.innerHTML = `<div class="kanban-card-avatar" style="background-color: ${c.status === 'Hired' ? 'var(--hired-color)' : 'var(--info-color)'}">${getInitials(c.name)}</div><div><h4 style="font-weight: 500">${c.name}</h4><p style="font-size: 0.8rem; color: var(--text-color-medium)">${c.score}% Match</p></div>`; card.addEventListener('click', () => selectCandidate(c.id)); kanbanColumn.appendChild(card); } });
+            const filteredCandidates = candidatesData.filter(c => currentJobFilter === 'all' || c.jobId === currentJobFilter);
+            filteredCandidates.forEach(c => { const kanbanColumn = document.getElementById(`kanban-${c.status}`); if (kanbanColumn) { const card = document.createElement('div'); card.className = 'kanban-card'; card.dataset.id = c.id; card.innerHTML = `<div class="kanban-card-avatar" style="background-color: ${c.status === 'Hired' ? 'var(--hired-color)' : 'var(--info-color)'}">${getInitials(c.name)}</div><div><h4 style="font-weight: 500">${c.name}</h4><p style="font-size: 0.8rem; color: var(--text-color-medium)">${c.score}% Match</p></div>`; card.addEventListener('click', () => selectCandidate(c.id)); kanbanColumn.appendChild(card); } });
             updateKanbanCounts(); setupDragAndDrop();
         }
 
-        function renderJobListView() {
+        function renderJobsView() {
             jobListContainer.innerHTML = '';
-
             jobsData.forEach(job => {
-                const candidatesForJob = candidatesData.filter(c => c.jobId === job.id).length;
+                const itemCount = candidatesData.filter(c => c.jobId === job.id).length;
                 const item = document.createElement('div');
-                item.className = `candidate-list-item ${job.id === selectedJobId ? 'selected' : ''}`;
-                item.dataset.id = job.id;
-
+                item.className = 'candidate-list-item'; // Reusing class for consistent styling
                 item.innerHTML = `
-                    <div class="candidate-list-item-main" style="align-items: center; width: 100%; justify-content: space-between;">
-                        <div class="candidate-info">
-                            <h3>${job.title}</h3>
-                            <p>${job.location}</p>
+                    <div class="candidate-info" style="flex-grow: 1;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <h3 style="margin-bottom: 4px;">${job.title}</h3>
+                            <span class="job-status-badge ${job.status.toLowerCase()}">${job.status}</span>
                         </div>
-                        <div style="text-align: right;">
-                            <p style="font-size: 1.1rem; font-weight: 600;">${candidatesForJob}</p>
-                            <p style="font-size: 0.8rem; color: var(--text-color-medium);">Applicants</p>
-                        </div>
+                        <p style="font-size: 0.875rem; color: var(--text-color-medium);">${itemCount} Applicants</p>
+                    </div>
+                    <div class="job-actions" style="display: flex; gap: 8px;">
+                        <button class="btn btn-subtle btn-edit-job" data-id="${job.id}" title="Edit Job"><i data-lucide="edit-3"></i></button>
+                        <button class="btn btn-subtle btn-view-candidates" data-id="${job.id}" title="View Candidates"><i data-lucide="users"></i></button>
+                        <button class="btn btn-subtle btn-copy-link" data-id="${job.id}" title="Copy Link"><i data-lucide="link"></i></button>
                     </div>
                 `;
-                item.addEventListener('click', () => selectJob(job.id));
                 jobListContainer.appendChild(item);
             });
-        }
-
-        function renderJobDetailView(job) {
-            jobDetailPlaceholder.style.display = 'none';
-            jobsDetailView.innerHTML = '';
-
-            const candidatesForJob = candidatesData.filter(c => c.jobId === job.id);
-
-            const detailFragment = document.createRange().createContextualFragment(\`
-                <div class="detail-header">
-                    <div class="detail-header-main">
-                         <div class="detail-avatar" style="background-color: var(--primary-color); color: white;"><i data-lucide="briefcase"></i></div>
-                        <div> <h2>${job.title}</h2> <p>${job.location}</p> </div>
-                    </div>
-                    <div class="detail-actions">
-                        <button class="btn btn-secondary" id="edit-job-btn"><i data-lucide="edit-3"></i> <span>Edit Job</span></button>
-                    </div>
-                </div>
-                <div class="detail-body">
-                    <div class="content-section">
-                        <h3>Job Description</h3>
-                        <p style="white-space: pre-wrap;">${job.description}</p>
-                    </div>
-                    <div class="content-section">
-                        <h3>${candidatesForJob.length} Applicants</h3>
-                        <div id="job-candidate-list" class="candidate-list-container" style="max-height: 400px; overflow-y: auto;">
-                        </div>
-                    </div>
-                </div>
-            \`);
-
-            const candidateListEl = detailFragment.getElementById('job-candidate-list');
-            if (candidatesForJob.length > 0) {
-                candidatesForJob.forEach(c => {
-                    const item = document.createElement('div');
-                    item.className = 'candidate-list-item';
-                    const circumference = 2 * Math.PI * 24; const offset = circumference - (c.score / 100) * circumference;
-                     item.innerHTML = `<div class="candidate-list-item-main"><div class="score-visual"><svg><circle class="bg-circle" cx="26" cy="26" r="24" fill="none" stroke-width="4"></circle><circle class="progress-circle" cx="26" cy="26" r="24" fill="none" stroke-width="4" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" stroke-linecap="round"></circle></svg><div class="score-text">${c.score}%</div></div><div class="candidate-info"><h3>${c.name}</h3><p>${c.status}</p></div></div>`;
-                    candidateListEl.appendChild(item);
-                });
-            } else {
-                candidateListEl.innerHTML = '<p style="text-align:center; color: var(--text-color-light); padding: 20px;">No applicants for this job yet.</p>';
-            }
-
-            jobsDetailView.appendChild(detailFragment);
-            jobsDetailView.querySelector('#edit-job-btn').addEventListener('click', () => openEditJobModal(job));
+            // Add event listeners after creating the buttons
+            jobListContainer.querySelectorAll('.btn-edit-job').forEach(btn => btn.addEventListener('click', (e) => openEditJobModal(e.currentTarget.dataset.id)));
+            jobListContainer.querySelectorAll('.btn-view-candidates').forEach(btn => btn.addEventListener('click', (e) => viewCandidatesForJob(e.currentTarget.dataset.id)));
+            jobListContainer.querySelectorAll('.btn-copy-link').forEach(btn => btn.addEventListener('click', (e) => copyJobLink(e.currentTarget)));
             lucide.createIcons();
         }
 
         function renderDetailView(candidate) {
             detailViewPlaceholder.style.display = 'none';
-            pipelineDetailView.innerHTML = '';
+            detailViewContent.innerHTML = '';
             const activityHTML = candidate.activity.map(a => `<div class="activity-item"><div class="activity-icon"><i data-lucide="${a.type}"></i></div><div class="activity-details"><p><strong>${a.type.charAt(0).toUpperCase() + a.type.slice(1).replace(/-/g, ' ')}</strong>: ${a.content}</p><p class="timestamp">${a.time}</p></div></div>`).join('');
 
-            const detailFragment = document.createRange().createContextualFragment(\`
+            const detailFragment = document.createRange().createContextualFragment(`
                 <div class="detail-header">
                     <div class="detail-header-main">
                         <button id="back-to-list-btn" class="btn btn-subtle"><i data-lucide="arrow-left"></i></button>
@@ -619,10 +592,10 @@
                     <div id="resume" class="tab-content"><div class="content-section"><h3>Resume</h3><div class="resume-placeholder"><p style="white-space: pre-wrap;">${candidate.resume}</p></div></div></div>
                     <div id="activity" class="tab-content"><div class="content-section"><h3>Timeline</h3>${activityHTML}</div></div>
                 </div>
-            \`);
-            pipelineDetailView.appendChild(detailFragment);
-            pipelineDetailView.querySelector('#stage-selector').addEventListener('change', (e) => updateCandidateStatus(e.target.value, [candidate.id]));
-            pipelineDetailView.querySelector('#back-to-list-btn').addEventListener('click', () => mainContent.classList.remove('detail-view-active'));
+            `);
+            detailViewContent.appendChild(detailFragment);
+            detailViewContent.querySelector('#stage-selector').addEventListener('change', (e) => updateCandidateStatus(e.target.value, [candidate.id]));
+            detailViewContent.querySelector('#back-to-list-btn').addEventListener('click', () => mainContent.classList.remove('detail-view-active'));
             lucide.createIcons();
             setupTabListeners();
         }
@@ -634,15 +607,6 @@
                 mainContent.classList.add('detail-view-active');
                 renderDetailView(candidate);
                 renderListView();
-            }
-        }
-
-        function selectJob(id) {
-            selectedJobId = id;
-            const job = jobsData.find(j => j.id === id);
-            if (job) {
-                renderJobDetailView(job);
-                renderJobListView(); // To update the selection highlight
             }
         }
         
@@ -665,11 +629,31 @@
         function updateBulkActionsBar() { const count = selectedCandidateIds.size; if (count > 0) { selectionCountEl.textContent = `${count} selected`; bulkActionsBar.classList.add('visible'); } else { bulkActionsBar.classList.remove('visible'); } }
         function clearSelections() { selectedCandidateIds.clear(); renderListView(); updateBulkActionsBar(); }
         function setupTabListeners() { const tabs = document.querySelectorAll('.tab-btn'); const contents = document.querySelectorAll('.tab-content'); tabs.forEach(tab => tab.addEventListener('click', () => { tabs.forEach(t => t.classList.remove('active')); tab.classList.add('active'); contents.forEach(c => c.classList.remove('active')); document.getElementById(tab.dataset.tab).classList.add('active'); })); }
-        function updateKanbanCounts() { Object.keys(pipelineStages).forEach(stageKey => { const count = candidatesData.filter(c => c.status === stageKey).length; const countEl = document.getElementById(`count-${stageKey}`); if(countEl) countEl.textContent = count; }); }
+        function updateKanbanCounts() { Object.keys(pipelineStages).forEach(stageKey => { const count = candidatesData.filter(c => (currentJobFilter === 'all' || c.jobId === currentJobFilter) && c.status === stageKey).length; const countEl = document.getElementById(`count-${stageKey}`); if(countEl) countEl.textContent = count; }); }
         function setupDragAndDrop() { const columns = document.querySelectorAll('.kanban-cards'); columns.forEach(col => new Sortable(col, { group: 'candidates', animation: 150, ghostClass: 'sortable-ghost', onEnd: (evt) => updateCandidateStatus(evt.to.dataset.stage, [parseInt(evt.item.dataset.id)]) })); }
         function triggerConfetti() { confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } }); }
-        function renderAllViews() { renderListView(); renderKanbanView(); renderJobListView(); }
+        function renderAllViews() { renderListView(); renderKanbanView(); renderJobsView(); populateJobFilter(); }
         
+        function populateJobFilter() {
+            const currentVal = jobFilterSelect.value;
+            jobFilterSelect.innerHTML = '<option value="all">All Jobs</option>';
+            jobsData.forEach(job => {
+                if (job.status === 'Active' || job.status === 'Paused') {
+                    const option = document.createElement('option');
+                    option.value = job.id;
+                    option.textContent = job.title;
+                    jobFilterSelect.appendChild(option);
+                }
+            });
+            jobFilterSelect.value = currentVal;
+        }
+
+        jobFilterSelect.addEventListener('change', (e) => {
+            currentJobFilter = e.target.value === 'all' ? 'all' : parseInt(e.target.value, 10);
+            renderListView();
+            renderKanbanView();
+        });
+
         // Bulk Actions Logic
         document.getElementById('bulk-approve').addEventListener('click', () => { updateCandidateStatus('Interview', selectedCandidateIds); clearSelections(); });
         document.getElementById('bulk-reject').addEventListener('click', () => { updateCandidateStatus('Rejected', selectedCandidateIds); clearSelections(); }); // Note: No 'Rejected' stage in data, for demo purposes.
@@ -690,38 +674,16 @@
         const openModal = (modal) => { modal.classList.add('show'); };
         const closeModal = (modal) => { 
             modal.classList.remove('show');
-            if (modal.id === 'create-job-modal') { modal.querySelector('#create-job-form-view').style.display = 'block'; modal.querySelector('#create-job-success-view').style.display = 'none'; modal.querySelector('#create-job-form').reset(); }
-            if (modal.id === 'add-candidate-modal') { document.getElementById('add-candidate-form').reset(); document.getElementById('resume-file-name').textContent = ''; }
-            if (modal.id === 'edit-job-modal') { editJobForm.reset(); }
+            // Reset forms when closing
+            const form = modal.querySelector('form');
+            if (form) form.reset();
+            if (modal.id === 'create-job-modal') { modal.querySelector('#create-job-form-view').style.display = 'block'; modal.querySelector('#create-job-success-view').style.display = 'none'; }
+            if (modal.id === 'add-candidate-modal') { document.getElementById('resume-file-name').textContent = ''; }
         };
-
-        function openEditJobModal(job) {
-            document.getElementById('edit-job-id').value = job.id;
-            document.getElementById('edit-job-title').value = job.title;
-            document.getElementById('edit-job-location').value = job.location;
-            document.getElementById('edit-job-description').value = job.description;
-            openModal(editJobModal);
-        }
-
         document.getElementById('add-candidate-btn').addEventListener('click', () => openModal(addCandidateModal));
         document.getElementById('placeholder-add-candidate-btn').addEventListener('click', () => openModal(addCandidateModal));
-        [document.getElementById('create-btn'), document.getElementById('placeholder-create-job-btn')].forEach(btn => btn.addEventListener('click', () => openModal(createJobModal)));
+        document.getElementById('add-job-btn').addEventListener('click', () => openModal(createJobModal));
         document.querySelectorAll('.modal-overlay').forEach(modal => { modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(modal); }); modal.querySelectorAll('.close-btn').forEach(btn => btn.addEventListener('click', () => closeModal(modal))); });
-
-        editJobForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const jobId = parseInt(document.getElementById('edit-job-id').value);
-            const jobIndex = jobsData.findIndex(j => j.id === jobId);
-            if (jobIndex > -1) {
-                jobsData[jobIndex].title = document.getElementById('edit-job-title').value;
-                jobsData[jobIndex].location = document.getElementById('edit-job-location').value;
-                jobsData[jobIndex].description = document.getElementById('edit-job-description').value;
-                selectJob(jobId); // Re-render the detail view
-                renderJobListView(); // Re-render the list
-            }
-            closeModal(editJobModal);
-        });
-
         const createJobForm = document.getElementById('create-job-form');
         createJobForm.addEventListener('submit', (e) => { e.preventDefault(); createJobForm.parentElement.style.display = 'none'; document.getElementById('create-job-success-view').style.display = 'block'; });
         document.getElementById('copy-link-btn').addEventListener('click', (e) => { const input = document.getElementById('job-link-input'); input.select(); document.execCommand('copy'); const btn = e.currentTarget; btn.innerHTML = '<i data-lucide="check"></i>'; lucide.createIcons(); setTimeout(() => { btn.innerHTML = '<i data-lucide="copy"></i>'; lucide.createIcons(); }, 2000); });
@@ -739,33 +701,83 @@
         dropArea.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files));
         function handleFiles(files) { if (files.length > 0) fileNameEl.textContent = files[0].name; }
 
-        // VIEW TOGGLE LOGIC
+        // --- JOB ACTIONS ---
+        function openEditJobModal(jobId) {
+            const job = jobsData.find(j => j.id === parseInt(jobId));
+            if (job) {
+                document.getElementById('edit-job-id').value = job.id;
+                document.getElementById('edit-job-title').value = job.title;
+                document.getElementById('edit-job-status').value = job.status;
+                openModal(editJobModal);
+            }
+        }
+
+        editJobForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const jobId = parseInt(document.getElementById('edit-job-id').value);
+            const job = jobsData.find(j => j.id === jobId);
+            if (job) {
+                job.title = document.getElementById('edit-job-title').value;
+                job.status = document.getElementById('edit-job-status').value;
+                renderJobsView();
+                populateJobFilter();
+            }
+            closeModal(editJobModal);
+        });
+
+        function viewCandidatesForJob(jobId) {
+            currentJobFilter = parseInt(jobId);
+            jobFilterSelect.value = jobId;
+            masterViewCandidatesBtn.click();
+            renderListView();
+            renderKanbanView();
+        }
+
+        function copyJobLink(buttonEl) {
+            const jobId = parseInt(buttonEl.dataset.id);
+            const job = jobsData.find(j => j.id === jobId);
+            if (job && navigator.clipboard) {
+                navigator.clipboard.writeText(job.sharableLink).then(() => {
+                    const originalIcon = buttonEl.innerHTML;
+                    buttonEl.innerHTML = '<i data-lucide="check"></i>';
+                    lucide.createIcons();
+                    setTimeout(() => { buttonEl.innerHTML = originalIcon; lucide.createIcons(); }, 2000);
+                });
+            }
+        }
+
+        // --- MASTER VIEW TOGGLE LOGIC ---
         const listViewBtn = document.getElementById('list-view-btn');
         const kanbanViewBtn = document.getElementById('kanban-view-btn');
         listViewBtn.addEventListener('click', () => { listView.style.display = 'block'; kanbanView.style.display = 'none'; listViewBtn.classList.add('active'); kanbanViewBtn.classList.remove('active'); });
         kanbanViewBtn.addEventListener('click', () => { listView.style.display = 'none'; kanbanView.style.display = 'block'; kanbanViewBtn.classList.add('active'); listViewBtn.classList.remove('active'); clearSelections(); });
 
-        // --- MAIN VIEW TOGGLE LOGIC ---
-        pipelineViewBtn.addEventListener('click', () => {
-            pipelineMasterView.style.display = 'flex';
-            pipelineDetailView.style.display = 'flex';
-            jobsMasterView.style.display = 'none';
-            jobsDetailView.style.display = 'none';
-            pipelineViewBtn.classList.add('active');
-            jobsViewBtn.classList.remove('active');
-        });
+        function toggleMainView(showCandidates) {
+            candidateTitleBar.style.display = showCandidates ? 'flex' : 'none';
+            candidateFilterBar.style.display = showCandidates ? 'flex' : 'none';
+            jobTitleBar.style.display = showCandidates ? 'none' : 'flex';
+            jobListContainer.style.display = showCandidates ? 'none' : 'block';
 
-        jobsViewBtn.addEventListener('click', () => {
-            pipelineMasterView.style.display = 'none';
-            pipelineDetailView.style.display = 'none';
-            jobsMasterView.style.display = 'flex';
-            jobsDetailView.style.display = 'flex';
-            jobsViewBtn.classList.add('active');
-            pipelineViewBtn.classList.remove('active');
-        });
+            if (showCandidates) {
+                // Show list or kanban based on which is active
+                const isListActive = listViewBtn.classList.contains('active');
+                listView.style.display = isListActive ? 'block' : 'none';
+                kanbanView.style.display = isListActive ? 'none' : 'block';
+            } else {
+                listView.style.display = 'none';
+                kanbanView.style.display = 'none';
+            }
+
+            masterViewCandidatesBtn.classList.toggle('active', showCandidates);
+            masterViewJobsBtn.classList.toggle('active', !showCandidates);
+        }
+
+        masterViewCandidatesBtn.addEventListener('click', () => toggleMainView(true));
+        masterViewJobsBtn.addEventListener('click', () => toggleMainView(false));
 
         // --- INITIALIZE ---
         renderAllViews();
+        toggleMainView(true); // Start on candidate view
         lucide.createIcons();
     });
     </script>
