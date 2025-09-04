@@ -365,50 +365,99 @@
     <div id="add-candidate-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Add New Candidate</h2>
+                <h2>Invite Candidate</h2>
                 <button class="close-btn"><i data-lucide="x"></i></button>
             </div>
             <form id="add-candidate-form">
-                <div class="form-group"><label for="first-name">First Name</label><input type="text" id="first-name"></div>
-                <div class="form-group"><label for="last-name">Last Name</label><input type="text" id="last-name"></div>
-                <div class="form-group"><label for="email">Email Address</label><input type="email" id="email"></div>
-                
                 <div class="form-group">
-                    <label>Resume</label>
-                    <div class="resume-upload-area" id="resume-drop-area">
-                        <input type="file" id="resume-file-input" hidden accept=".pdf,.doc,.docx,.txt">
-                        <i data-lucide="upload-cloud"></i>
-                        <p><span>Click to upload</span> or drag and drop</p>
-                        <p id="resume-file-name"></p>
-                    </div>
+                    <label for="candidate-name">Candidate's Full Name</label>
+                    <input type="text" id="candidate-name" required>
                 </div>
-
+                <div class="form-group">
+                    <label for="candidate-email">Candidate's Email Address</label>
+                    <input type="email" id="candidate-email" required>
+                </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary close-btn">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Candidate</button>
+                    <button type="submit" class="btn btn-primary">Send Profile Invitation</button>
                 </div>
             </form>
         </div>
     </div>
 
     <div id="create-job-modal" class="modal-overlay">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 700px;">
             <div id="create-job-form-view">
                 <div class="modal-header">
                     <h2>Create New Job Posting</h2>
                     <button class="close-btn"><i data-lucide="x"></i></button>
                 </div>
                 <form id="create-job-form">
-                    <div class="form-group"><label for="job-title">Job Title</label><input type="text" id="job-title" placeholder="e.g. Senior Python Developer"></div>
-                    <div class="form-group"><label for="location">Location</label><input type="text" id="location" placeholder="e.g. Remote"></div>
-                    <div class="form-group"><label for="job-description">Description</label><textarea id="job-description" rows="4"></textarea></div>
+                    <div class="detail-tabs" id="create-job-tabs">
+                        <button type="button" class="tab-btn active" data-tab="create-details">Details</button>
+                        <button type="button" class="tab-btn" data-tab="create-description">Description</button>
+                        <button type="button" class="tab-btn" data-tab="create-settings">Settings</button>
+                    </div>
+
+                    <div id="create-details" class="tab-content active" style="padding-top: 24px;">
+                        <div class="form-group">
+                            <label for="job-title">Job Title</label>
+                            <input type="text" id="job-title" placeholder="e.g. Senior Python Developer" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="department">Department/Team</label>
+                            <input type="text" id="department" placeholder="e.g. Engineering">
+                        </div>
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <input type="text" id="location" placeholder="e.g. Remote, New York, NY">
+                        </div>
+                         <div class="form-group">
+                            <label>Workplace Policy</label>
+                            <div style="display: flex; gap: 24px; margin-top: 8px;">
+                                <label style="display: flex; align-items: center; gap: 6px; font-weight: normal;"><input type="radio" name="workplace-policy" value="Remote" checked> Remote</label>
+                                <label style="display: flex; align-items: center; gap: 6px; font-weight: normal;"><input type="radio" name="workplace-policy" value="Hybrid"> Hybrid</label>
+                                <label style="display: flex; align-items: center; gap: 6px; font-weight: normal;"><input type="radio" name="workplace-policy" value="On-site"> On-site</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="job-type">Job Type</label>
+                            <select id="job-type" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--background-color); color: var(--text-color-dark); font-size: 1rem;">
+                                <option>Full-time</option><option>Part-time</option><option>Contract</option><option>Internship</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="experience-level">Experience Level</label>
+                            <select id="experience-level" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--background-color); color: var(--text-color-dark); font-size: 1rem;">
+                                <option>Entry</option><option>Mid-level</option><option>Senior</option><option>Lead</option><option>Manager</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="compensation">Compensation</label>
+                            <input type="text" id="compensation" placeholder="e.g. $120,000 - $150,000">
+                        </div>
+                    </div>
+
+                    <div id="create-description" class="tab-content" style="padding-top: 24px;">
+                        <div class="form-group"><label for="about-job">About the Job</label><textarea id="about-job" rows="4" placeholder="Provide a brief summary of the role..."></textarea></div>
+                        <div class="form-group"><label for="responsibilities">Key Responsibilities</label><textarea id="responsibilities" rows="4" placeholder="List the primary duties and tasks..."></textarea></div>
+                        <div class="form-group"><label for="qualifications">Skills & Qualifications</label><textarea id="qualifications" rows="4" placeholder="List necessary skills, experience, and education..."></textarea></div>
+                        <div class="form-group"><label for="benefits">Perks & Benefits</label><textarea id="benefits" rows="4" placeholder="List any perks, benefits, or cultural highlights..."></textarea></div>
+                    </div>
+
+                    <div id="create-settings" class="tab-content" style="padding-top: 24px;">
+                        <div class="form-group"><label for="internal-notes">Internal Comments/Notes</label><textarea id="internal-notes" rows="4" placeholder="Internal notes visible only to the hiring team..."></textarea></div>
+                        <div class="form-group"><label for="hiring-manager">Hiring Manager</label><input type="text" id="hiring-manager" placeholder="e.g. Jane Doe"></div>
+                        <div class="form-group"><label for="internal-job-id">Internal Job ID</label><input type="text" id="internal-job-id" placeholder="e.g. REQ-2025-001"></div>
+                    </div>
+
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary close-btn">Cancel</button>
                         <button type="submit" class="btn btn-primary">Create Job</button>
                     </div>
                 </form>
             </div>
-            <div id="create-job-success-view" style="display: none;">
+             <div id="create-job-success-view" style="display: none;">
                  <div class="modal-header">
                     <h2>Success!</h2>
                     <button class="close-btn"><i data-lucide="x"></i></button>
@@ -426,33 +475,55 @@
     </div>
 
     <div id="edit-job-modal" class="modal-overlay">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
                 <h2>Edit Job Posting</h2>
                 <button class="close-btn"><i data-lucide="x"></i></button>
             </div>
             <form id="edit-job-form">
                 <input type="hidden" id="edit-job-id">
-                <div class="form-group">
-                    <label for="edit-job-title">Job Title</label>
-                    <input type="text" id="edit-job-title" required>
+                <div class="detail-tabs" id="edit-job-tabs">
+                    <button type="button" class="tab-btn active" data-tab="edit-details">Details</button>
+                    <button type="button" class="tab-btn" data-tab="edit-description">Description</button>
+                    <button type="button" class="tab-btn" data-tab="edit-settings">Settings</button>
                 </div>
-                <div class="form-group">
-                    <label for="edit-job-location">Location</label>
-                    <input type="text" id="edit-job-location" required>
+
+                <div id="edit-details" class="tab-content active" style="padding-top: 24px;">
+                    <div class="form-group"><label for="edit-job-title">Job Title</label><input type="text" id="edit-job-title" required></div>
+                    <div class="form-group"><label for="edit-department">Department/Team</label><input type="text" id="edit-department"></div>
+                    <div class="form-group"><label for="edit-location">Location</label><input type="text" id="edit-location"></div>
+                    <div class="form-group">
+                        <label>Workplace Policy</label>
+                        <div style="display: flex; gap: 24px; margin-top: 8px;">
+                            <label style="display: flex; align-items: center; gap: 6px; font-weight: normal;"><input type="radio" name="edit-workplace-policy" value="Remote"> Remote</label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-weight: normal;"><input type="radio" name="edit-workplace-policy" value="Hybrid"> Hybrid</label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-weight: normal;"><input type="radio" name="edit-workplace-policy" value="On-site"> On-site</label>
+                        </div>
+                    </div>
+                    <div class="form-group"><label for="edit-job-type">Job Type</label><select id="edit-job-type" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--background-color); color: var(--text-color-dark); font-size: 1rem;"><option>Full-time</option><option>Part-time</option><option>Contract</option><option>Internship</option></select></div>
+                    <div class="form-group"><label for="edit-experience-level">Experience Level</label><select id="edit-experience-level" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--background-color); color: var(--text-color-dark); font-size: 1rem;"><option>Entry</option><option>Mid-level</option><option>Senior</option><option>Lead</option><option>Manager</option></select></div>
+                    <div class="form-group"><label for="edit-compensation">Compensation</label><input type="text" id="edit-compensation"></div>
+                    <div class="form-group">
+                        <label for="edit-job-status">Status</label>
+                        <select id="edit-job-status" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--background-color); color: var(--text-color-dark); font-size: 1rem;">
+                            <option value="Active">Active</option><option value="Paused">Paused</option><option value="Closed">Closed</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="edit-job-description">Description</label>
-                    <textarea id="edit-job-description" rows="4"></textarea>
+
+                <div id="edit-description" class="tab-content" style="padding-top: 24px;">
+                    <div class="form-group"><label for="edit-about-job">About the Job</label><textarea id="edit-about-job" rows="4"></textarea></div>
+                    <div class="form-group"><label for="edit-responsibilities">Key Responsibilities</label><textarea id="edit-responsibilities" rows="4"></textarea></div>
+                    <div class="form-group"><label for="edit-qualifications">Skills & Qualifications</label><textarea id="edit-qualifications" rows="4"></textarea></div>
+                    <div class="form-group"><label for="edit-benefits">Perks & Benefits</label><textarea id="edit-benefits" rows="4"></textarea></div>
                 </div>
-                <div class="form-group">
-                    <label for="edit-job-status">Status</label>
-                    <select id="edit-job-status" class="form-group" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--background-color); color: var(--text-color-dark); font-size: 1rem;">
-                        <option value="Active">Active</option>
-                        <option value="Paused">Paused</option>
-                        <option value="Closed">Closed</option>
-                    </select>
+
+                <div id="edit-settings" class="tab-content" style="padding-top: 24px;">
+                    <div class="form-group"><label for="edit-internal-notes">Internal Comments/Notes</label><textarea id="edit-internal-notes" rows="4"></textarea></div>
+                    <div class="form-group"><label for="edit-hiring-manager">Hiring Manager</label><input type="text" id="edit-hiring-manager"></div>
+                    <div class="form-group"><label for="edit-internal-job-id">Internal Job ID</label><input type="text" id="edit-internal-job-id"></div>
                 </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary close-btn">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -471,9 +542,9 @@
         let currentJobFilter = 'all';
 
         let jobsData = [
-            { id: 1, title: 'Senior Python Developer', location: 'Remote', description: 'Seeking an experienced Python developer to build scalable web applications. Must be proficient in Django and REST APIs.', status: 'Active', sharableLink: 'https://talentflow.dev/jobs/1a2b3c' },
-            { id: 2, title: 'Frontend Engineer', location: 'New York, NY', description: 'We are looking for a creative Frontend Engineer to join our team. You will be responsible for building the client-side of our web applications.', status: 'Paused', sharableLink: 'https://talentflow.dev/jobs/4d5e6f' },
-            { id: 3, title: 'Data Scientist', location: 'San Francisco, CA', description: 'Join our data team to build models and drive insights from large datasets. Experience with machine learning is a plus.', status: 'Closed', sharableLink: 'https://talentflow.dev/jobs/7g8h9i' }
+            { id: 1, title: 'Senior Python Developer', department: 'Engineering', location: 'Remote', workplacePolicy: 'Remote', jobType: 'Full-time', experienceLevel: 'Senior', compensation: '$150,000 - $180,000', aboutJob: 'Seeking an experienced Python developer to build scalable web applications.', keyResponsibilities: 'Design and implement backend services.\n- Write clean, maintainable code.', skillsQualifications: 'Must be proficient in Django and REST APIs.\n- 5+ years of experience.', perksBenefits: 'Unlimited PTO, 401k matching, health insurance.', internalNotes: 'High priority role.', hiringManager: 'Jane Doe', internalJobId: 'ENG-001', status: 'Active', sharableLink: 'https://talentflow.dev/jobs/1a2b3c' },
+            { id: 2, title: 'Frontend Engineer', department: 'Engineering', location: 'New York, NY', workplacePolicy: 'Hybrid', jobType: 'Full-time', experienceLevel: 'Mid-level', compensation: '$120,000 - $140,000', aboutJob: 'We are looking for a creative Frontend Engineer to join our team.', keyResponsibilities: 'You will be responsible for building the client-side of our web applications.', skillsQualifications: 'React, TypeScript, and CSS expertise required.', perksBenefits: 'Commuter benefits, free lunch.', internalNotes: '', hiringManager: 'John Smith', internalJobId: 'ENG-002', status: 'Paused', sharableLink: 'https://talentflow.dev/jobs/4d5e6f' },
+            { id: 3, title: 'Data Scientist', department: 'Data & Analytics', location: 'San Francisco, CA', workplacePolicy: 'On-site', jobType: 'Full-time', experienceLevel: 'Senior', compensation: '$160,000 - $190,000', aboutJob: 'Join our data team to build models and drive insights from large datasets.', keyResponsibilities: 'Analyze data, build predictive models.', skillsQualifications: 'Experience with machine learning is a plus.', perksBenefits: 'Conference budget, flexible hours.', internalNotes: 'Candidate must have ML experience.', hiringManager: 'Emily White', internalJobId: 'DATA-001', status: 'Closed', sharableLink: 'https://talentflow.dev/jobs/7g8h9i' }
         ];
 
         let candidatesData = [
@@ -608,21 +679,28 @@
         function renderJobDetailView(job) {
             detailViewPlaceholder.style.display = 'none';
             detailViewContent.innerHTML = '';
+             const descriptionHTML = `
+                ${job.aboutJob ? `<h4>About the Job</h4><p style="white-space: pre-wrap; margin-bottom: 16px;">${job.aboutJob}</p>` : ''}
+                ${job.keyResponsibilities ? `<h4>Key Responsibilities</h4><p style="white-space: pre-wrap; margin-bottom: 16px;">${job.keyResponsibilities}</p>` : ''}
+                ${job.skillsQualifications ? `<h4>Skills & Qualifications</h4><p style="white-space: pre-wrap; margin-bottom: 16px;">${job.skillsQualifications}</p>` : ''}
+                ${job.perksBenefits ? `<h4>Perks & Benefits</h4><p style="white-space: pre-wrap;">${job.perksBenefits}</p>` : ''}
+                ${job.description ? `<p style="white-space: pre-wrap;">${job.description}</p>` : ''}
+            `;
             const detailFragment = document.createRange().createContextualFragment(`
                 <div class="detail-header">
                      <div class="detail-header-main">
                         <button id="back-to-list-btn" class="btn btn-subtle"><i data-lucide="arrow-left"></i></button>
                         <div class="detail-avatar" style="background-color: var(--primary-color);"><i data-lucide="briefcase"></i></div>
-                        <div> <h2>${job.title}</h2> <p>${job.location}</p> </div>
+                        <div> <h2>${job.title}</h2> <p>${job.department} &bull; ${job.location}</p> </div>
                     </div>
                 </div>
                 <div class="detail-body">
                     <div class="content-section">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
-                            <h3>Job Description</h3>
+                            <h3 style="font-size: 1.125rem;">Job Details</h3>
                             <span class="job-status-badge ${job.status.toLowerCase()}">${job.status}</span>
                         </div>
-                        <p style="white-space: pre-wrap;">${job.description}</p>
+                        ${descriptionHTML}
                     </div>
                 </div>
             `);
@@ -727,37 +805,98 @@
             modal.classList.remove('show');
             const form = modal.querySelector('form');
             if (form) form.reset();
-            if (modal.id === 'create-job-modal') { modal.querySelector('#create-job-form-view').style.display = 'block'; modal.querySelector('#create-job-success-view').style.display = 'none'; }
-            if (modal.id === 'add-candidate-modal') { document.getElementById('resume-file-name').textContent = ''; }
+            if (modal.id === 'create-job-modal') {
+                modal.querySelector('#create-job-form-view').style.display = 'block';
+                modal.querySelector('#create-job-success-view').style.display = 'none';
+            }
         };
+
+        function setupModalTabs(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+            const tabs = modal.querySelectorAll('.tab-btn');
+            const contents = modal.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    contents.forEach(c => c.classList.remove('active'));
+                    modal.querySelector(`#${tab.dataset.tab}`).classList.add('active');
+                });
+            });
+        }
+
         document.getElementById('add-candidate-btn').addEventListener('click', () => openModal(addCandidateModal));
         document.getElementById('add-job-btn').addEventListener('click', () => openModal(createJobModal));
         document.querySelectorAll('.modal-overlay').forEach(modal => { modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(modal); }); modal.querySelectorAll('.close-btn').forEach(btn => btn.addEventListener('click', () => closeModal(modal))); });
+
+        const addCandidateForm = document.getElementById('add-candidate-form');
+        addCandidateForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const candidateName = document.getElementById('candidate-name').value;
+            const candidateEmail = document.getElementById('candidate-email').value;
+
+            if (candidateName && candidateEmail) {
+                closeModal(addCandidateModal);
+                alert('Invitation has been successfully sent to the candidate.');
+            }
+        });
+
         const createJobForm = document.getElementById('create-job-form');
-        createJobForm.addEventListener('submit', (e) => { e.preventDefault(); createJobForm.parentElement.style.display = 'none'; document.getElementById('create-job-success-view').style.display = 'block'; });
-        document.getElementById('copy-link-btn').addEventListener('click', (e) => { const input = document.getElementById('job-link-input'); input.select(); document.execCommand('copy'); const btn = e.currentTarget; btn.innerHTML = '<i data-lucide="check"></i>'; lucide.createIcons(); setTimeout(() => { btn.innerHTML = '<i data-lucide="copy"></i>'; lucide.createIcons(); }, 2000); });
+        createJobForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newJob = {
+                id: Math.max(...jobsData.map(j => j.id)) + 1,
+                title: document.getElementById('job-title').value,
+                department: document.getElementById('department').value,
+                location: document.getElementById('location').value,
+                workplacePolicy: createJobForm.querySelector('input[name="workplace-policy"]:checked').value,
+                jobType: document.getElementById('job-type').value,
+                experienceLevel: document.getElementById('experience-level').value,
+                compensation: document.getElementById('compensation').value,
+                aboutJob: document.getElementById('about-job').value,
+                keyResponsibilities: document.getElementById('responsibilities').value,
+                skillsQualifications: document.getElementById('qualifications').value,
+                perksBenefits: document.getElementById('benefits').value,
+                internalNotes: document.getElementById('internal-notes').value,
+                hiringManager: document.getElementById('hiring-manager').value,
+                internalJobId: document.getElementById('internal-job-id').value,
+                status: 'Active',
+                sharableLink: `https://talentflow.dev/jobs/${Math.random().toString(36).substring(2, 8)}`
+            };
+            jobsData.push(newJob);
+            renderAllViews();
+            createJobForm.parentElement.style.display = 'none';
+            const successView = document.getElementById('create-job-success-view');
+            successView.style.display = 'block';
+            successView.querySelector('#job-link-input').value = newJob.sharableLink;
+        });
         
-        // Resume Upload Logic
-        const dropArea = document.getElementById('resume-drop-area');
-        const fileInput = document.getElementById('resume-file-input');
-        const fileNameEl = document.getElementById('resume-file-name');
-        dropArea.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', () => handleFiles(fileInput.files));
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => dropArea.addEventListener(eventName, preventDefaults, false));
-        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
-        ['dragenter', 'dragover'].forEach(eventName => dropArea.addEventListener(eventName, () => dropArea.classList.add('dragover')));
-        ['dragleave', 'drop'].forEach(eventName => dropArea.addEventListener(eventName, () => dropArea.classList.remove('dragover')));
-        dropArea.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files));
-        function handleFiles(files) { if (files.length > 0) fileNameEl.textContent = files[0].name; }
+        document.getElementById('copy-link-btn').addEventListener('click', (e) => { const input = document.getElementById('job-link-input'); input.select(); document.execCommand('copy'); const btn = e.currentTarget; btn.innerHTML = '<i data-lucide="check"></i>'; lucide.createIcons(); setTimeout(() => { btn.innerHTML = '<i data-lucide="copy"></i>'; lucide.createIcons(); }, 2000); });
 
         // --- JOB ACTIONS ---
         function openEditJobModal(jobId) {
             const job = jobsData.find(j => j.id === parseInt(jobId));
             if (job) {
                 document.getElementById('edit-job-id').value = job.id;
-                document.getElementById('edit-job-title').value = job.title;
-                document.getElementById('edit-job-location').value = job.location;
-                document.getElementById('edit-job-description').value = job.description;
+                document.getElementById('edit-job-title').value = job.title || '';
+                document.getElementById('edit-department').value = job.department || '';
+                document.getElementById('edit-location').value = job.location || '';
+                const policyRadio = editJobForm.querySelector(`input[name="edit-workplace-policy"][value="${job.workplacePolicy}"]`);
+                if (policyRadio) policyRadio.checked = true;
+                else editJobForm.querySelector('input[name="edit-workplace-policy"][value="Remote"]').checked = true;
+                document.getElementById('edit-job-type').value = job.jobType || 'Full-time';
+                document.getElementById('edit-experience-level').value = job.experienceLevel || 'Senior';
+                document.getElementById('edit-compensation').value = job.compensation || '';
+                document.getElementById('edit-about-job').value = job.aboutJob || (job.description || '');
+                document.getElementById('edit-responsibilities').value = job.keyResponsibilities || '';
+                document.getElementById('edit-qualifications').value = job.skillsQualifications || '';
+                document.getElementById('edit-benefits').value = job.perksBenefits || '';
+                document.getElementById('edit-internal-notes').value = job.internalNotes || '';
+                document.getElementById('edit-hiring-manager').value = job.hiringManager || '';
+                document.getElementById('edit-internal-job-id').value = job.internalJobId || '';
                 document.getElementById('edit-job-status').value = job.status;
                 openModal(editJobModal);
             }
@@ -769,14 +908,25 @@
             const job = jobsData.find(j => j.id === jobId);
             if (job) {
                 job.title = document.getElementById('edit-job-title').value;
-                job.location = document.getElementById('edit-job-location').value;
-                job.description = document.getElementById('edit-job-description').value;
+                job.department = document.getElementById('edit-department').value;
+                job.location = document.getElementById('edit-location').value;
+                job.workplacePolicy = editJobForm.querySelector('input[name="edit-workplace-policy"]:checked').value;
+                job.jobType = document.getElementById('edit-job-type').value;
+                job.experienceLevel = document.getElementById('edit-experience-level').value;
+                job.compensation = document.getElementById('edit-compensation').value;
+                job.aboutJob = document.getElementById('edit-about-job').value;
+                job.keyResponsibilities = document.getElementById('edit-responsibilities').value;
+                job.skillsQualifications = document.getElementById('edit-qualifications').value;
+                job.perksBenefits = document.getElementById('edit-benefits').value;
+                job.internalNotes = document.getElementById('edit-internal-notes').value;
+                job.hiringManager = document.getElementById('edit-hiring-manager').value;
+                job.internalJobId = document.getElementById('edit-internal-job-id').value;
                 job.status = document.getElementById('edit-job-status').value;
+
                 renderJobsView();
                 populateJobFilter();
-                // If the edited job was selected, re-render its detail view
                 if (job.id === selectedJobId) {
-                    renderJobDetailView(job);
+                    selectJob(job.id); // Reselect to re-render detail view
                 }
             }
             closeModal(editJobModal);
@@ -844,6 +994,8 @@
         // --- INITIALIZE ---
         renderAllViews();
         toggleMainView(true); // Start on candidate view
+        setupModalTabs('create-job-modal');
+        setupModalTabs('edit-job-modal');
         lucide.createIcons();
     });
     </script>
