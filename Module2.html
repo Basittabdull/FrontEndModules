@@ -268,6 +268,20 @@
             font-weight: 500;
             text-align: right;
         }
+        .value-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .edit-link {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        .edit-link:hover {
+            text-decoration: underline;
+        }
 
         /* Conditional Fields */
         .conditional-fields {
@@ -285,6 +299,50 @@
         .theme-option { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 6px; cursor: pointer; }
         .theme-option:hover { background-color: var(--background-color); }
         .theme-swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--border-color); }
+
+        /* --- Modal --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background-color: var(--card-background);
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+        }
+        .modal-title {
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+        }
+        .modal-content p {
+            color: var(--text-color-medium);
+            margin-bottom: 24px;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+        .modal-actions .btn-secondary {
+             background-color: var(--card-background);
+            color: var(--text-color-medium);
+            border-color: var(--border-color);
+        }
+         .modal-actions .btn-secondary:hover {
+            background-color: var(--background-color);
+        }
     </style>
 </head>
 <body>
@@ -421,23 +479,80 @@
                         <h3>Account</h3>
                         <div class="review-item">
                             <span class="label">Email</span>
-                            <span class="value" id="review-email"></span>
+                            <div class="value-group">
+                                <span class="value" id="review-email"></span>
+                                <a href="#" class="edit-link" data-step="0">Edit</a>
+                            </div>
                         </div>
                     </div>
                     <div class="review-sub-section">
                         <h3>Personal Details</h3>
-                        <div class="review-item"><span class="label">Name</span><span class="value" id="review-name"></span></div>
-                        <div class="review-item"><span class="label">Phone</span><span class="value" id="review-phone"></span></div>
-                        <div class="review-item"><span class="label">Country</span><span class="value" id="review-country"></span></div>
-                        <div class="review-item"><span class="label">Address</span><span class="value" id="review-address"></span></div>
-                        <div class="review-item"><span class="label">LinkedIn</span><span class="value" id="review-linkedin"></span></div>
+                        <div class="review-item">
+                            <span class="label">Name</span>
+                             <div class="value-group">
+                                <span class="value" id="review-name"></span>
+                                <a href="#" class="edit-link" data-step="1">Edit</a>
+                            </div>
+                        </div>
+                        <div class="review-item">
+                            <span class="label">Phone</span>
+                             <div class="value-group">
+                                <span class="value" id="review-phone"></span>
+                                <a href="#" class="edit-link" data-step="1">Edit</a>
+                            </div>
+                        </div>
+                        <div class="review-item">
+                            <span class="label">Country</span>
+                             <div class="value-group">
+                                <span class="value" id="review-country"></span>
+                                <a href="#" class="edit-link" data-step="1">Edit</a>
+                            </div>
+                        </div>
+                         <div class="review-item">
+                            <span class="label">Address</span>
+                             <div class="value-group">
+                                <span class="value" id="review-address"></span>
+                                <a href="#" class="edit-link" data-step="1">Edit</a>
+                            </div>
+                        </div>
+                        <div class="review-item">
+                            <span class="label">LinkedIn</span>
+                             <div class="value-group">
+                                <span class="value" id="review-linkedin"></span>
+                                <a href="#" class="edit-link" data-step="1">Edit</a>
+                            </div>
+                        </div>
                     </div>
                     <div class="review-sub-section">
                         <h3>Experience</h3>
-                        <div class="review-item"><span class="label">Employment Status</span><span class="value" id="review-employment-status"></span></div>
-                        <div class="review-item"><span class="label">Current Company</span><span class="value" id="review-current-company"></span></div>
-                        <div class="review-item"><span class="label">Current Title</span><span class="value" id="review-current-title"></span></div>
-                        <div class="review-item"><span class="label">Total Experience</span><span class="value" id="review-total-experience"></span></div>
+                        <div class="review-item">
+                            <span class="label">Employment Status</span>
+                            <div class="value-group">
+                                <span class="value" id="review-employment-status"></span>
+                                <a href="#" class="edit-link" data-step="2">Edit</a>
+                            </div>
+                        </div>
+                        <div class="review-item" id="review-item-company">
+                            <span class="label">Current Company</span>
+                             <div class="value-group">
+                                <span class="value" id="review-current-company"></span>
+                                <a href="#" class="edit-link" data-step="2">Edit</a>
+                            </div>
+                        </div>
+                        <div class="review-item" id="review-item-title">
+                            <span class="label">Current Title</span>
+                             <div class="value-group">
+                                <span class="value" id="review-current-title"></span>
+                                <a href="#" class="edit-link" data-step="2">Edit</a>
+                            </div>
+                        </div>
+                        <div class="review-item">
+                            <span class="label">Total Experience</span>
+                             <div class="value-group">
+                                <span class="value" id="review-total-experience"></span>
+                                <a href="#" class="edit-link" data-step="2">Edit</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -454,6 +569,17 @@
              <p>Thank you for applying. We will review your application and get back to you soon.</p>
         </section>
 
+        <!-- Submission Confirmation Modal -->
+        <div id="submission-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <h2 class="modal-title">Submit Your Application?</h2>
+                <p>You are about to submit your application for the Senior Python Developer role. You will not be able to make any changes after this.</p>
+                <div class="modal-actions">
+                    <button id="cancel-submission-btn" class="btn btn-secondary">Cancel</button>
+                    <button id="confirm-submission-btn" class="btn btn-primary">Yes, Submit Application</button>
+                </div>
+            </div>
+        </div>
     </main>
 
     <footer class="app-footer">
@@ -491,11 +617,17 @@
                 });
                 currentPage = pageIndex;
                 updateProgress();
+
+                // Populate review data when showing the final step
+                if (pageIndex === 3) {
+                    populateReviewData();
+                }
             };
 
             nextBtns.forEach(button => {
                 button.addEventListener('click', () => {
                     if (currentPage < pages.length - 1) {
+                        // Add validation logic here if needed
                         showPage(currentPage + 1);
                     }
                 });
@@ -563,15 +695,43 @@
                 document.getElementById('review-current-company').textContent = formData.currentCompany || 'N/A';
                 document.getElementById('review-current-title').textContent = formData.currentTitle || 'N/A';
                 document.getElementById('review-total-experience').textContent = `${formData.totalExperience} years` || 'N/A';
+
+                // Hide conditional review fields if not applicable
+                const isWorking = document.getElementById('employment-status').value === 'working';
+                document.getElementById('review-item-company').style.display = isWorking ? 'flex' : 'none';
+                document.getElementById('review-item-title').style.display = isWorking ? 'flex' : 'none';
             };
+
+            const submissionModal = document.getElementById('submission-modal');
+            const confirmSubmissionBtn = document.getElementById('confirm-submission-btn');
+            const cancelSubmissionBtn = document.getElementById('cancel-submission-btn');
 
             multiStepForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                populateReviewData();
+                // Instead of submitting, show the modal
+                submissionModal.style.display = 'flex';
+            });
+
+            cancelSubmissionBtn.addEventListener('click', () => {
+                submissionModal.style.display = 'none';
+            });
+
+            confirmSubmissionBtn.addEventListener('click', () => {
+                // Perform the actual submission
                 console.log('Final Application Data:', formData);
+                submissionModal.style.display = 'none';
                 multiStepForm.style.display = 'none';
                 document.getElementById('confirmation-page').style.display = 'block';
                 document.querySelector('.progress-indicator').style.display = 'none';
+            });
+
+            // --- Edit Links ---
+            document.querySelectorAll('.edit-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const step = parseInt(e.target.dataset.step, 10);
+                    showPage(step);
+                });
             });
 
             // --- Specific Field Logic ---
