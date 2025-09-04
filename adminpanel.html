@@ -215,6 +215,31 @@
         }
         .page-header h1 {
             font-size: 1.75rem;
+            margin-right: auto; /* Pushes button to the right */
+        }
+
+        .search-bar {
+            position: relative;
+        }
+
+        .search-bar input {
+            padding: 8px 16px 8px 40px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-background);
+            color: var(--text-color-dark);
+            font-size: 0.875rem;
+            min-width: 300px;
+        }
+
+        .search-bar i {
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            transform: translateY(-50%);
+            color: var(--text-color-light);
+            width: 20px;
+            height: 20px;
         }
         
         /* --- Dashboard Screen --- */
@@ -307,6 +332,7 @@
         .btn-primary { background-color: var(--primary-color); color: white; }
         .btn-secondary { background-color: var(--card-background); color: var(--text-color-medium); border-color: var(--border-color); }
         .btn-secondary:hover { background-color: var(--background-color); }
+        .btn-danger { background-color: var(--danger-color); color: white; }
 
         .main-footer {
             flex-shrink: 0;
@@ -415,6 +441,10 @@
                 <section id="user-management-page" class="page">
                     <div class="page-header">
                         <h1>User Management</h1>
+                        <div class="search-bar">
+                             <i data-lucide="search"></i>
+                             <input type="text" placeholder="Search by name or email...">
+                        </div>
                         <button id="add-user-btn" class="btn btn-primary"><i data-lucide="plus"></i> Add New HR User</button>
                     </div>
                     <div class="user-table-container">
@@ -479,6 +509,20 @@
         </div>
     </div>
 
+    <div id="reset-password-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Confirm Password Reset</h2>
+                <button class="close-btn"><i data-lucide="x"></i></button>
+            </div>
+            <p>Are you sure you want to send a password reset link to <strong id="reset-user-email"></strong>? This action cannot be undone.</p>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary close-btn">Cancel</button>
+                <button type="button" id="confirm-reset-btn" class="btn btn-danger">Confirm & Send Link</button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -500,6 +544,7 @@
             const editUserModal = document.getElementById('edit-user-modal');
             const editUserForm = document.getElementById('edit-user-form');
             const userTableBody = document.getElementById('user-table-body');
+            const resetPasswordModal = document.getElementById('reset-password-modal');
             const profileBtn = document.getElementById('profile-btn');
             const profileDropdown = document.getElementById('profile-dropdown');
             const menuBtn = document.getElementById('menu-btn');
@@ -533,6 +578,7 @@
                         <td><span class="status-badge ${user.status.toLowerCase()}">${user.status}</span></td>
                         <td class="action-buttons">
                             <button title="Edit" class="edit-btn"><i data-lucide="edit"></i></button>
+                            <button title="Reset Password" class="reset-password-btn"><i data-lucide="key-round"></i></button>
                             <button title="${actionTitle}" class="toggle-status-btn"><i data-lucide="${actionIcon}"></i></button>
                         </td>
                     `;
@@ -567,6 +613,15 @@
                 }
             }
 
+            function openResetPasswordModal(userId) {
+                const user = users.find(u => u.id === userId);
+                if (!user) return;
+
+                document.getElementById('reset-user-email').textContent = user.email;
+                document.getElementById('confirm-reset-btn').dataset.userId = user.id;
+                openModal(resetPasswordModal);
+            }
+
 
             // --- EVENT LISTENERS ---
             navLinks.forEach(link => {
@@ -581,10 +636,16 @@
 
             addUserBtn.addEventListener('click', () => openModal(addUserModal));
             
-            [addUserModal, editUserModal].forEach(modal => {
+            [addUserModal, editUserModal, resetPasswordModal].forEach(modal => {
                 modal.querySelectorAll('.close-btn, .btn-secondary').forEach(btn => {
                     btn.addEventListener('click', () => closeModal(modal));
                 });
+            });
+
+            document.getElementById('confirm-reset-btn').addEventListener('click', (e) => {
+                const userEmail = document.getElementById('reset-user-email').textContent;
+                closeModal(resetPasswordModal);
+                alert(`Password reset link has been successfully sent to ${userEmail}.`);
             });
             
             addUserForm.addEventListener('submit', (e) => {
@@ -628,6 +689,7 @@
             userTableBody.addEventListener('click', (e) => {
                 const editBtn = e.target.closest('.edit-btn');
                 const toggleStatusBtn = e.target.closest('.toggle-status-btn');
+                const resetPasswordBtn = e.target.closest('.reset-password-btn');
                 
                 if (editBtn) {
                     const userId = parseInt(editBtn.closest('tr').dataset.userId);
@@ -637,6 +699,11 @@
                 if (toggleStatusBtn) {
                     const userId = parseInt(toggleStatusBtn.closest('tr').dataset.userId);
                     toggleUserStatus(userId);
+                }
+
+                if (resetPasswordBtn) {
+                    const userId = parseInt(resetPasswordBtn.closest('tr').dataset.userId);
+                    openResetPasswordModal(userId);
                 }
             });
 
