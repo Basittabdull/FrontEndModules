@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apply for Senior Python Developer</title>
+    <title>Apply - TalentFlow</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root, body[data-theme='ocean'] {
+        :root {
             --primary-color: #0891B2;
             --primary-hover-color: #06B6D4;
             --text-color-dark: #1E293B;
@@ -21,40 +21,8 @@
             --success-color: #10B981;
         }
 
-        body[data-theme='dark'] {
-            --primary-color: #22D3EE;
-            --primary-hover-color: #67E8F9;
-            --text-color-dark: #F8FAFC;
-            --text-color-medium: #94A3B8;
-            --text-color-light: #64748B;
-            --background-color: #0F172A;
-            --card-background: #1E293B;
-            --border-color: #334155;
-        }
-
-        .resume-upload-area:hover, .resume-upload-area.dragover {
-            border-color: var(--primary-color);
-            background-color: rgba(8, 145, 178, 0.05);
-        }
-
-        /* --- Theme Switcher --- */
-        .theme-switcher { position: relative; }
-        #theme-btn { background: none; border: none; cursor: pointer; color: var(--text-color-medium); padding: 4px;}
-        #theme-dropdown { position: absolute; top: 140%; right: 0; background-color: var(--card-background); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 8px; display: none; width: 150px; z-index: 1001; }
-        #theme-dropdown.show { display: block; }
-        .theme-option { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 6px; cursor: pointer; }
-        .theme-option:hover { background-color: var(--background-color); }
-        .theme-swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--border-color); }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        html, body {
-            height: 100%;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -62,401 +30,205 @@
             color: var(--text-color-dark);
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
             line-height: 1.6;
         }
-
-        .page-container {
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 24px;
-        }
         
-        /* --- Header & Footer --- */
         .app-header, .app-footer {
             flex-shrink: 0;
             padding: 20px 24px;
             background-color: var(--card-background);
             border-color: var(--border-color);
+            width: 100%;
         }
-        .app-header {
-            border-bottom: 1px solid var(--border-color);
-        }
-        .logo {
-            font-weight: 700;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--primary-color);
-        }
-        .app-footer {
-            border-top: 1px solid var(--border-color);
-            text-align: center;
-            font-size: 0.875rem;
-            color: var(--text-color-light);
-        }
-        .app-footer a {
-            color: var(--text-color-medium);
-            text-decoration: none;
-            margin: 0 8px;
-        }
-        .app-footer a:hover {
-            color: var(--primary-color);
-        }
+        .app-header { border-bottom: 1px solid var(--border-color); }
+        .logo { font-weight: 700; font-size: 1.5rem; display: flex; align-items: center; gap: 8px; color: var(--primary-color); }
+        .app-footer { border-top: 1px solid var(--border-color); text-align: center; font-size: 0.875rem; color: var(--text-color-light); }
+        .app-footer a { color: var(--text-color-medium); text-decoration: none; margin: 0 8px; }
+        .app-footer a:hover { color: var(--primary-color); }
 
-        /* --- Page Sections --- */
-        .page {
-            display: none; /* Hidden by default */
+        .page-container {
+            display: flex;
             flex-direction: column;
             align-items: center;
-            text-align: center;
+            flex-grow: 1;
             width: 100%;
-        }
-        .page.active {
-            display: flex;
+            padding: 40px 24px;
+            overflow-y: auto;
         }
         
-        /* --- Screen 1: Application Page --- */
-        #application-page .job-title {
+        .form-container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .progress-indicator {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .page-title {
             font-size: 2rem;
             font-weight: 700;
-            margin-top: 16px;
-        }
-        #application-page .location {
-            font-size: 1.125rem;
-            color: var(--text-color-medium);
-            margin-bottom: 8px;
-        }
-        
-        /* Job Description Section */
-        #view-details-link {
-            color: var(--primary-color);
-            font-weight: 500;
-            cursor: pointer;
-            text-decoration: none;
-            margin-bottom: 24px;
-        }
-        #job-description-details {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-in-out;
-            text-align: left;
-            background-color: var(--card-background);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            margin-bottom: 24px;
-        }
-        #job-description-details .content {
-            padding: 24px;
-        }
-         #job-description-details h3 {
-            margin-bottom: 8px;
-        }
-        #job-description-details ul {
-            list-style-position: inside;
-            padding-left: 8px;
-        }
-        #job-description-details li {
-            margin-bottom: 4px;
+            margin-bottom: 32px;
+            text-align: center;
         }
 
+        .form-step { display: none; }
+        .form-step.active { display: block; }
 
-        .social-apply-buttons {
-            display: flex;
-            gap: 16px;
-            width: 100%;
-            margin-bottom: 24px;
-        }
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            padding: 12px 20px;
-            border: 1px solid transparent;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: var(--primary-hover-color);
-        }
-        .btn-secondary {
-            background-color: var(--card-background);
-            color: var(--text-color-medium);
-            border-color: var(--border-color);
-        }
-        .btn-secondary:hover {
-            background-color: var(--background-color);
-        }
-        
-        .divider {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            margin-bottom: 24px;
-            color: var(--text-color-light);
-        }
-        .divider::before, .divider::after {
-            content: '';
-            flex-grow: 1;
-            height: 1px;
-            background-color: var(--border-color);
-        }
-        .divider span {
-            padding: 0 16px;
-        }
-
-        .application-form {
-            width: 100%;
-            text-align: left;
-        }
-        .form-group {
-            margin-bottom: 16px;
-        }
-        .form-group input {
+        .form-group { margin-bottom: 20px; position: relative; }
+        .form-group label { display: block; font-weight: 500; margin-bottom: 6px; font-size: 0.875rem; }
+        .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 12px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 1rem;
+            background-color: var(--card-background);
+            color: var(--text-color-dark);
         }
-        .form-group input:focus {
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             outline: none;
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
         }
+        .password-toggle { position: absolute; top: 38px; right: 12px; cursor: pointer; color: var(--text-color-light); }
         
-        .resume-upload-area {
-            border: 2px dashed var(--border-color);
-            border-radius: 8px;
-            padding: 40px 20px;
-            text-align: center;
-            background-color: var(--card-background);
-            color: var(--text-color-medium);
-            cursor: pointer;
-            margin: 24px 0;
-            transition: border-color 0.2s, background-color 0.2s;
-        }
-        .resume-upload-area:hover, .resume-upload-area.dragover {
-            border-color: var(--primary-color);
-            background-color: #f0f9ff;
-        }
-        .resume-upload-area p span {
-            color: var(--primary-color);
-            font-weight: 500;
-        }
-        #resume-file-name {
-            margin-top: 8px;
-            font-style: italic;
-        }
+        .form-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; border: 1px solid transparent; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover-color); }
+        .btn-link { background: none; border: none; color: var(--text-color-medium); font-weight: 500; cursor: pointer; }
 
-        /* --- Screen 2: Review Page --- */
-        #review-page h1, #confirmation-page h1 {
-            font-size: 1.75rem;
-            margin: 16px 0 24px;
-        }
-        .review-section {
-            width: 100%;
-            text-align: left;
-            background-color: var(--card-background);
-            padding: 24px;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            margin-bottom: 24px;
-        }
-        .review-section h2 {
-            font-size: 1.25rem;
-            margin-bottom: 16px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 8px;
-        }
-        .review-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-        }
-        .review-item .label {
-            color: var(--text-color-medium);
-        }
-        .review-item .value {
-            font-weight: 500;
-        }
-        .edit-link {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.875rem;
-            cursor: pointer;
-        }
-        .review-buttons {
-            display: flex;
-            gap: 16px;
-            width: 100%;
-        }
+        #conditional-fields { display: none; }
 
-        /* --- Screen 3: Confirmation Page --- */
-        .confirmation-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background-color: #d1fae5;
-            color: var(--success-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 32px;
-        }
-        .confirmation-icon i {
-            width: 48px;
-            height: 48px;
-        }
-        #confirmation-page p {
-            max-width: 450px;
-            color: var(--text-color-medium);
-        }
+        .resume-upload-area { border: 2px dashed var(--border-color); border-radius: 8px; padding: 40px; text-align: center; background-color: var(--card-background); color: var(--text-color-medium); cursor: pointer; margin-bottom: 24px; }
+        .resume-upload-area p span { color: var(--primary-color); font-weight: 500; }
+        #resume-file-name { margin-top: 8px; font-style: italic; }
+
+        .review-summary { background-color: var(--card-background); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .review-section { margin-bottom: 24px; }
+        .review-section:last-child { margin-bottom: 0; }
+        .review-section h3 { font-size: 1.25rem; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+        .review-item { display: flex; justify-content: space-between; padding: 4px 0; }
+        .review-item .label { color: var(--text-color-medium); }
+        .review-item .value { font-weight: 500; text-align: right; }
+
+        .confirmation-icon { width: 64px; height: 64px; border-radius: 50%; background-color: #d1fae5; color: var(--success-color); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+        .confirmation-icon i { width: 40px; height: 40px; }
 
     </style>
 </head>
 <body>
-    <header class="app-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <header class="app-header">
         <div class="logo">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             TalentFlow
         </div>
-        <div class="theme-switcher">
-            <button id="theme-btn" title="Change theme"><i data-lucide="palette"></i></button>
-            <div id="theme-dropdown">
-                <div class="theme-option" data-theme-value="ocean"><span class="theme-swatch" style="background-color: #0891B2;"></span> Ocean</div>
-                <div class="theme-option" data-theme-value="dark"><span class="theme-swatch" style="background-color: #1F2937;"></span> Dark</div>
-            </div>
-        </div>
     </header>
 
     <main class="page-container">
-        <!-- SCREEN 1: APPLICATION PAGE -->
-        <section id="application-page" class="page active">
-            <h1 class="job-title">Senior Python Developer</h1>
-            <p class="location">New York, NY / Remote</p>
+        <div class="form-container">
+            <!-- Step 1: Account -->
+            <section id="step-1" class="form-step active">
+                <p class="progress-indicator">Step 1 of 4: Account</p>
+                <h1 class="page-title">Create Your Profile</h1>
+                <form id="form-step-1">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Create Password</label>
+                        <input type="password" id="password" required>
+                        <span class="password-toggle" data-for="password"><i data-lucide="eye"></i></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm Password</label>
+                        <input type="password" id="confirm-password" required>
+                        <span class="password-toggle" data-for="confirm-password"><i data-lucide="eye"></i></span>
+                    </div>
+                    <div class="form-actions" style="justify-content: flex-end;">
+                        <button type="submit" class="btn btn-primary">Next: Personal Details</button>
+                    </div>
+                </form>
+            </section>
 
-            <a href="#" id="view-details-link">View Details</a>
+            <!-- Step 2: Your Details -->
+            <section id="step-2" class="form-step">
+                <p class="progress-indicator">Step 2 of 4: Your Details</p>
+                <h1 class="page-title">Personal & Contact Details</h1>
+                <form id="form-step-2">
+                    <div class="form-group"><label for="first-name">First Name</label><input type="text" id="first-name" required></div>
+                    <div class="form-group"><label for="last-name">Last Name</label><input type="text" id="last-name" required></div>
+                    <div class="form-group"><label for="phone">Phone Number</label><input type="tel" id="phone" required></div>
+                    <div class="form-group"><label for="country">Country</label><select id="country" required><option value="">Select a country...</option><option value="USA">United States</option><option value="Canada">Canada</option><option value="UK">United Kingdom</option></select></div>
+                    <div class="form-group"><label for="address">Address</label><textarea id="address" required></textarea></div>
+                    <div class="form-group"><label for="linkedin">LinkedIn Profile URL (Optional)</label><input type="url" id="linkedin"></div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-link" data-nav="back">Back</button>
+                        <button type="submit" class="btn btn-primary">Next: Professional Experience</button>
+                    </div>
+                </form>
+            </section>
 
-            <div id="job-description-details">
-                <div class="content">
-                    <h3>About the Role</h3>
-                    <p>We are seeking an experienced Senior Python Developer to join our dynamic team. You will be responsible for building and maintaining scalable web applications, designing robust APIs, and collaborating with cross-functional teams to deliver high-quality software solutions.</p>
-                    <br>
-                    <h3>Responsibilities</h3>
-                    <ul>
-                        <li>Develop and maintain server-side logic using Python.</li>
-                        <li>Design and implement low-latency, high-availability, and performant applications.</li>
-                        <li>Integrate user-facing elements developed by front-end developers with server-side logic.</li>
-                        <li>Implement security and data protection solutions.</li>
-                    </ul>
-                </div>
-            </div>
+            <!-- Step 3: Experience -->
+            <section id="step-3" class="form-step">
+                <p class="progress-indicator">Step 3 of 4: Experience</p>
+                <h1 class="page-title">Professional Experience</h1>
+                <form id="form-step-3">
+                    <div class="form-group">
+                        <label for="employment-status">Employment Status</label>
+                        <select id="employment-status" required>
+                            <option value="working">I am currently working</option>
+                            <option value="fresher">I am a recent graduate (Fresher)</option>
+                            <option value="break">I am on a career break</option>
+                        </select>
+                    </div>
+                    <div id="conditional-fields">
+                        <div class="form-group"><label for="company-name">Current Company Name</label><input type="text" id="company-name"></div>
+                        <div class="form-group"><label for="job-title">Current Job Title</label><input type="text" id="job-title"></div>
+                    </div>
+                    <div class="form-group"><label for="experience-years">Total Years of Experience</label><input type="number" id="experience-years" required></div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-link" data-nav="back">Back</button>
+                        <button type="submit" class="btn btn-primary">Next: Upload Resume</button>
+                    </div>
+                </form>
+            </section>
 
-            <div class="social-apply-buttons">
-                <button class="btn btn-secondary"><i data-lucide="linkedin"></i> Apply with LinkedIn</button>
-            </div>
-
-            <div class="divider"><span>OR</span></div>
-
-            <form class="application-form" id="application-form">
-                <div class="form-group">
-                    <input type="text" id="first-name" placeholder="First Name" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" id="last-name" placeholder="Last Name" required>
-                </div>
-                <div class="form-group">
-                    <input type="email" id="email" placeholder="Email" required>
-                </div>
-                <div class="form-group">
-                    <input type="tel" id="phone" placeholder="Phone" required>
-                </div>
-
+            <!-- Step 4: Final Review -->
+            <section id="step-4" class="form-step">
+                <p class="progress-indicator">Step 4 of 4: Final Review</p>
+                <h1 class="page-title">Resume & Final Review</h1>
                 <div class="resume-upload-area" id="resume-drop-area">
                     <input type="file" id="resume-file-input" hidden accept=".pdf,.doc,.docx,.txt">
-                    <p><span id="resume-action-text">Click to upload</span> or drag and drop</p>
+                    <p><span>Click to upload resume</span> or drag and drop</p>
                     <p id="resume-file-name"></p>
                 </div>
-
-                <button type="submit" class="btn btn-primary">Proceed to Review</button>
-            </form>
-        </section>
-
-        <!-- SCREEN 2: REVIEW PAGE -->
-        <section id="review-page" class="page">
-            <h1>Review Your Application</h1>
-            
-            <div class="review-section">
-                <h2>Personal Information</h2>
-                <div class="review-item">
-                    <span class="label">First Name</span>
-                    <div>
-                        <span class="value" id="review-first-name"></span>
-                        <a class="edit-link" data-field="first-name">Edit</a>
-                    </div>
+                <div class="review-summary">
+                    <div class="review-section"><h3>Account</h3><div class="review-item"><span class="label">Email</span><span class="value" id="review-email"></span></div></div>
+                    <div class="review-section"><h3>Personal Details</h3><div class="review-item"><span class="label">Full Name</span><span class="value" id="review-name"></span></div><div class="review-item"><span class="label">Phone</span><span class="value" id="review-phone"></span></div><div class="review-item"><span class="label">Country</span><span class="value" id="review-country"></span></div><div class="review-item"><span class="label">Address</span><span class="value" id="review-address"></span></div><div class="review-item"><span class="label">LinkedIn</span><span class="value" id="review-linkedin"></span></div></div>
+                    <div class="review-section"><h3>Experience</h3><div class="review-item"><span class="label">Employment Status</span><span class="value" id="review-status"></span></div><div class="review-item"><span class="label">Current Company</span><span class="value" id="review-company"></span></div><div class="review-item"><span class="label">Current Title</span><span class="value" id="review-title"></span></div><div class="review-item"><span class="label">Years of Experience</span><span class="value" id="review-experience"></span></div></div>
                 </div>
-                 <div class="review-item">
-                    <span class="label">Last Name</span>
-                    <div>
-                        <span class="value" id="review-last-name"></span>
-                        <a class="edit-link" data-field="last-name">Edit</a>
-                    </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-link" data-nav="back">Back</button>
+                    <button type="button" id="submit-application" class="btn btn-primary">Submit Application</button>
                 </div>
-                <div class="review-item">
-                    <span class="label">Email</span>
-                    <div>
-                        <span class="value" id="review-email"></span>
-                        <a class="edit-link" data-field="email">Edit</a>
-                    </div>
-                </div>
-                <div class="review-item">
-                    <span class="label">Phone</span>
-                    <div>
-                        <span class="value" id="review-phone"></span>
-                        <a class="edit-link" data-field="phone">Edit</a>
-                    </div>
-                </div>
-            </div>
+            </section>
 
-            <div class="review-section">
-                <h2>Resume</h2>
-                <div class="review-item">
-                    <span class="value" id="review-resume-file"></span>
-                    <a class="edit-link" data-field="resume">Edit</a>
-                </div>
-            </div>
+            <!-- Final Confirmation Screen -->
+            <section id="step-5" class="form-step" style="text-align: center;">
+                 <div class="confirmation-icon"><i data-lucide="check"></i></div>
+                 <h1 class="page-title">Application Submitted!</h1>
+                 <p style="max-width: 450px; color: var(--text-color-medium);">Thank you for applying. Our team will review your profile and get in touch if there is a good fit.</p>
+            </section>
 
-            <div class="review-buttons">
-                <button id="go-back-btn" class="btn btn-secondary">Go Back & Edit</button>
-                <button id="submit-btn" class="btn btn-primary">Submit Application</button>
-            </div>
-        </section>
-
-        <!-- SCREEN 3: CONFIRMATION PAGE -->
-        <section id="confirmation-page" class="page">
-            <div class="confirmation-icon">
-                <i data-lucide="check"></i>
-            </div>
-            <h1>Your Application Has Been Submitted!</h1>
-            <p>Thank you for your interest. Our recruiting team will review your application and will be in touch if your qualifications match our needs. Please allow up to two weeks for a response.</p>
-        </section>
+        </div>
     </main>
 
     <footer class="app-footer">
@@ -468,141 +240,188 @@
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
 
-            // --- DOM Elements ---
-            const pages = {
-                application: document.getElementById('application-page'),
-                review: document.getElementById('review-page'),
-                confirmation: document.getElementById('confirmation-page')
+            // --- THEME SWITCHER LOGIC ---
+            const themeBtn = document.getElementById('theme-btn');
+            if (themeBtn) { // Adding a check in case it's removed later
+                const themeDropdown = document.getElementById('theme-dropdown');
+                const themeOptions = document.querySelectorAll('.theme-option');
+                const setTheme = (theme) => {
+                    document.body.dataset.theme = theme;
+                    localStorage.setItem('talentflow-theme', theme);
+                };
+                themeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    themeDropdown.classList.toggle('show');
+                });
+                themeOptions.forEach(option => {
+                    option.addEventListener('click', () => setTheme(option.dataset.themeValue));
+                });
+                window.addEventListener('click', () => themeDropdown.classList.remove('show'));
+                const savedTheme = localStorage.getItem('talentflow-theme') || 'ocean';
+                setTheme(savedTheme);
+            }
+
+            // --- MULTI-STEP FORM LOGIC ---
+            const steps = document.querySelectorAll('.form-step');
+            if (steps.length === 0) return; // Don't run if the form isn't on the page
+
+            const forms = {
+                step1: document.getElementById('form-step-1'),
+                step2: document.getElementById('form-step-2'),
+                step3: document.getElementById('form-step-3'),
+            };
+            const backBtns = document.querySelectorAll('[data-nav="back"]');
+            const submitBtn = document.getElementById('submit-application');
+
+            let currentStep = 1;
+            const applicationData = {};
+
+            const showStep = (stepNumber) => {
+                steps.forEach(step => step.classList.remove('active'));
+                const nextStep = document.getElementById(`step-${stepNumber}`);
+                if (nextStep) {
+                    nextStep.classList.add('active');
+                    currentStep = stepNumber;
+                    window.scrollTo(0, 0);
+                }
             };
 
-            const form = document.getElementById('application-form');
+            // --- Navigation & Data Handling ---
+            forms.step1.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match.');
+                    return;
+                }
+                applicationData.email = document.getElementById('email').value;
+                applicationData.password = password;
+                showStep(2);
+            });
+
+            forms.step2.addEventListener('submit', (e) => {
+                e.preventDefault();
+                applicationData.firstName = document.getElementById('first-name').value;
+                applicationData.lastName = document.getElementById('last-name').value;
+                applicationData.phone = document.getElementById('phone').value;
+                applicationData.country = document.getElementById('country').value;
+                applicationData.address = document.getElementById('address').value;
+                applicationData.linkedin = document.getElementById('linkedin').value;
+                showStep(3);
+            });
+
+            forms.step3.addEventListener('submit', (e) => {
+                e.preventDefault();
+                applicationData.employmentStatus = document.getElementById('employment-status').value;
+                if (applicationData.employmentStatus === 'working') {
+                    applicationData.companyName = document.getElementById('company-name').value;
+                    applicationData.jobTitle = document.getElementById('job-title').value;
+                } else {
+                    applicationData.companyName = '';
+                    applicationData.jobTitle = '';
+                }
+                applicationData.experienceYears = document.getElementById('experience-years').value;
+                populateReviewPage();
+                showStep(4);
+            });
+
+            backBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (currentStep > 1) {
+                        showStep(currentStep - 1);
+                    }
+                });
+            });
+
+            submitBtn.addEventListener('click', () => {
+                if (!applicationData.resumeFile) {
+                    alert('Please upload a resume before submitting.');
+                    return;
+                }
+                console.log("Final Application Data:", applicationData);
+                showStep(5);
+            });
+
+            function populateReviewPage() {
+                document.getElementById('review-email').textContent = applicationData.email || 'N/A';
+                document.getElementById('review-name').textContent = `${applicationData.firstName || ''} ${applicationData.lastName || ''}`;
+                document.getElementById('review-phone').textContent = applicationData.phone || 'N/A';
+                document.getElementById('review-country').textContent = applicationData.country || 'N/A';
+                document.getElementById('review-address').textContent = applicationData.address || 'N/A';
+                document.getElementById('review-linkedin').textContent = applicationData.linkedin || 'N/A';
+
+                const statusSelect = document.getElementById('employment-status');
+                const selectedStatusText = statusSelect.options[statusSelect.selectedIndex].text;
+                document.getElementById('review-status').textContent = selectedStatusText;
+
+                const companyReview = document.getElementById('review-company').parentElement;
+                const titleReview = document.getElementById('review-title').parentElement;
+
+                if (applicationData.employmentStatus === 'working') {
+                    companyReview.style.display = 'flex';
+                    titleReview.style.display = 'flex';
+                    document.getElementById('review-company').textContent = applicationData.companyName || 'N/A';
+                    document.getElementById('review-title').textContent = applicationData.jobTitle || 'N/A';
+                } else {
+                    companyReview.style.display = 'none';
+                    titleReview.style.display = 'none';
+                }
+                document.getElementById('review-experience').textContent = `${applicationData.experienceYears || 0} years`;
+            }
+
+            // --- Feature-specific Logic ---
+            const employmentStatusSelect = document.getElementById('employment-status');
+            employmentStatusSelect.addEventListener('change', (e) => {
+                const conditionalFields = document.getElementById('conditional-fields');
+                const companyInput = document.getElementById('company-name');
+                const titleInput = document.getElementById('job-title');
+                if (e.target.value === 'working') {
+                    conditionalFields.style.display = 'block';
+                    companyInput.required = true;
+                    titleInput.required = true;
+                } else {
+                    conditionalFields.style.display = 'none';
+                    companyInput.required = false;
+                    titleInput.required = false;
+                }
+            });
+            employmentStatusSelect.dispatchEvent(new Event('change'));
+
+            document.querySelectorAll('.password-toggle').forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    const inputId = toggle.dataset.for;
+                    const input = document.getElementById(inputId);
+                    const icon = toggle.querySelector('i');
+                    if (input.type === "password") {
+                        input.type = "text";
+                        icon.setAttribute('data-lucide', 'eye-off');
+                    } else {
+                        input.type = "password";
+                        icon.setAttribute('data-lucide', 'eye');
+                    }
+                    lucide.createIcons();
+                });
+            });
+
             const dropArea = document.getElementById('resume-drop-area');
             const fileInput = document.getElementById('resume-file-input');
             const fileNameEl = document.getElementById('resume-file-name');
-            const goBackButton = document.getElementById('go-back-btn');
-            const submitButton = document.getElementById('submit-btn');
-            const viewDetailsLink = document.getElementById('view-details-link');
-            const jobDescriptionDetails = document.getElementById('job-description-details');
-
-            // --- State ---
-            let applicationData = {
-                firstName: '',
-                lastName: '',
-                email: '',
-                phone: '',
-                resumeFile: null
-            };
-
-            // --- Functions ---
-            const showPage = (pageName) => {
-                Object.values(pages).forEach(page => page.classList.remove('active'));
-                pages[pageName].classList.add('active');
-            };
-
             const handleFiles = (files) => {
                 if (files.length > 0) {
                     applicationData.resumeFile = files[0];
                     fileNameEl.textContent = `File selected: ${applicationData.resumeFile.name}`;
-                    document.getElementById('resume-action-text').textContent = 'Change file';
                 }
             };
-
-            const populateReviewPage = () => {
-                document.getElementById('review-first-name').textContent = applicationData.firstName;
-                document.getElementById('review-last-name').textContent = applicationData.lastName;
-                document.getElementById('review-email').textContent = applicationData.email;
-                document.getElementById('review-phone').textContent = applicationData.phone;
-                document.getElementById('review-resume-file').textContent = applicationData.resumeFile ? applicationData.resumeFile.name : 'No file uploaded';
-            };
-
-            // --- Event Listeners for Page 1 ---
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                applicationData.firstName = document.getElementById('first-name').value;
-                applicationData.lastName = document.getElementById('last-name').value;
-                applicationData.email = document.getElementById('email').value;
-                applicationData.phone = document.getElementById('phone').value;
-                
-                if (!applicationData.resumeFile) {
-                    alert('Please upload a resume to continue.');
-                    return;
-                }
-                
-                populateReviewPage();
-                showPage('review');
-            });
-
-            // Job Description Toggle
-            viewDetailsLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                const isExpanded = jobDescriptionDetails.style.maxHeight;
-                if (isExpanded && isExpanded !== '0px') {
-                    jobDescriptionDetails.style.maxHeight = '0px';
-                    viewDetailsLink.textContent = 'View Details';
-                } else {
-                    jobDescriptionDetails.style.maxHeight = jobDescriptionDetails.scrollHeight + 'px';
-                    viewDetailsLink.textContent = 'Hide Details';
-                }
-            });
-
-            // --- Resume Upload Logic ---
             dropArea.addEventListener('click', () => fileInput.click());
             fileInput.addEventListener('change', () => handleFiles(fileInput.files));
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
                 dropArea.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); }, false);
             });
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropArea.addEventListener(eventName, () => dropArea.classList.add('dragover'), false);
-            });
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropArea.addEventListener(eventName, () => dropArea.classList.remove('dragover'), false);
-            });
+            ['dragenter', 'dragover'].forEach(eventName => dropArea.addEventListener(eventName, () => dropArea.classList.add('dragover'), false));
+            ['dragleave', 'drop'].forEach(eventName => dropArea.addEventListener(eventName, () => dropArea.classList.remove('dragover'), false));
             dropArea.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files), false);
-
-            // --- Event Listeners for Page 2 ---
-            goBackButton.addEventListener('click', () => showPage('application'));
-            
-            document.querySelectorAll('.edit-link').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    showPage('application');
-                    const fieldToFocus = e.target.dataset.field;
-                    if (fieldToFocus === 'resume') {
-                        // maybe scroll to resume area
-                    } else {
-                         document.getElementById(fieldToFocus).focus();
-                    }
-                });
-            });
-
-            submitButton.addEventListener('click', () => {
-                console.log('Submitting Application:', applicationData);
-                showPage('confirmation');
-            });
-
-            // --- THEME SWITCHER LOGIC ---
-            const themeBtn = document.getElementById('theme-btn');
-            const themeDropdown = document.getElementById('theme-dropdown');
-            const themeOptions = document.querySelectorAll('.theme-option');
-            function setTheme(theme) {
-                document.body.dataset.theme = theme;
-                localStorage.setItem('talentflow-theme', theme);
-            }
-            themeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                themeDropdown.classList.toggle('show');
-            });
-            themeOptions.forEach(option => {
-                option.addEventListener('click', () => {
-                    setTheme(option.dataset.themeValue);
-                });
-            });
-            window.addEventListener('click', () => themeDropdown.classList.remove('show'));
-            const savedTheme = localStorage.getItem('talentflow-theme') || 'ocean';
-            setTheme(savedTheme);
         });
     </script>
 </body>
 </html>
-
-
