@@ -313,6 +313,7 @@
                 <div class="master-header">
                     <div class="view-toggle" style="margin-bottom: 16px;">
                         <button id="master-view-candidates-btn" class="active" style="flex: 1; justify-content: center;"><i data-lucide="users"></i><span style="margin-left: 8px;">Candidates</span></button>
+                        <button id="master-view-review-btn" style="flex: 1; justify-content: center;"><i data-lucide="clipboard-check"></i><span style="margin-left: 8px;">Ready for Review</span></button>
                         <button id="master-view-jobs-btn" style="flex: 1; justify-content: center;"><i data-lucide="briefcase"></i><span style="margin-left: 8px;">Jobs</span></button>
                     </div>
                      <div id="candidate-title-bar" class="master-title-bar">
@@ -336,6 +337,25 @@
                 </div>
                 <div id="candidate-list-view" class="candidate-list-container"></div>
                 <div id="candidate-kanban-view" class="candidate-list-container" style="display:none;"></div>
+                <div id="review-list-container" class="candidate-list-container" style="display:none; padding: 0;">
+                    <div style="padding: 20px; border-bottom: 1px solid var(--border-color);">
+                        <input type="search" id="review-search" placeholder="Search by candidate name..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--background-color); color: var(--text-color-dark); font-size: 1rem;">
+                    </div>
+                    <table id="review-table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="text-align: left; color: var(--text-color-medium); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                <th style="padding: 12px 20px; cursor: pointer;" data-sort="name">Candidate Name</th>
+                                <th style="padding: 12px 20px; cursor: pointer;" data-sort="job">Job Title</th>
+                                <th style="padding: 12px 20px; cursor: pointer;" data-sort="date">Interview Date</th>
+                                <th style="padding: 12px 20px; cursor: pointer;" data-sort="score">Overall Score</th>
+                                <th style="padding: 12px 20px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="review-table-body">
+                            <!-- Candidate rows will be rendered here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
                 <div id="job-list-container" class="candidate-list-container" style="display:none;"></div>
             </div>
             <div class="detail-view" id="detail-view-content">
@@ -570,6 +590,8 @@
         const jobListContainer = document.getElementById('job-list-container');
         const masterViewCandidatesBtn = document.getElementById('master-view-candidates-btn');
         const masterViewJobsBtn = document.getElementById('master-view-jobs-btn');
+        const masterViewReviewBtn = document.getElementById('master-view-review-btn');
+        const reviewListContainer = document.getElementById('review-list-container');
         const candidateTitleBar = document.getElementById('candidate-title-bar');
         const jobTitleBar = document.getElementById('job-title-bar');
         const candidateFilterBar = document.getElementById('candidate-filter-bar');
@@ -959,41 +981,117 @@
         listViewBtn.addEventListener('click', () => { listView.style.display = 'block'; kanbanView.style.display = 'none'; listViewBtn.classList.add('active'); kanbanViewBtn.classList.remove('active'); });
         kanbanViewBtn.addEventListener('click', () => { listView.style.display = 'none'; kanbanView.style.display = 'block'; kanbanViewBtn.classList.add('active'); listViewBtn.classList.remove('active'); clearSelections(); });
 
-        function toggleMainView(showCandidates) {
-            if (showCandidates) {
-                selectedJobId = null;
-                if (!selectedCandidateId) showPlaceholder();
-            } else {
-                selectedCandidateId = null;
-                if (!selectedJobId) showPlaceholder();
-            }
+        function toggleMainView(view) {
+            selectedCandidateId = null;
+            selectedJobId = null;
+            showPlaceholder();
 
-            candidateTitleBar.style.display = showCandidates ? 'flex' : 'none';
-            candidateFilterBar.style.display = showCandidates ? 'flex' : 'none';
-            jobTitleBar.style.display = showCandidates ? 'none' : 'flex';
-            jobListContainer.style.display = showCandidates ? 'none' : 'block';
+            const isListActive = listViewBtn.classList.contains('active');
 
-            if (showCandidates) {
-                const isListActive = listViewBtn.classList.contains('active');
+            // Hide all main containers first
+            candidateTitleBar.style.display = 'none';
+            candidateFilterBar.style.display = 'none';
+            jobTitleBar.style.display = 'none';
+            jobListContainer.style.display = 'none';
+            listView.style.display = 'none';
+            kanbanView.style.display = 'none';
+            reviewListContainer.style.display = 'none';
+
+            // Deactivate all buttons first
+            masterViewCandidatesBtn.classList.remove('active');
+            masterViewReviewBtn.classList.remove('active');
+            masterViewJobsBtn.classList.remove('active');
+
+            if (view === 'candidates') {
+                candidateTitleBar.style.display = 'flex';
+                candidateFilterBar.style.display = 'flex';
                 listView.style.display = isListActive ? 'block' : 'none';
                 kanbanView.style.display = isListActive ? 'none' : 'block';
-            } else {
-                listView.style.display = 'none';
-                kanbanView.style.display = 'none';
+                masterViewCandidatesBtn.classList.add('active');
+            } else if (view === 'review') {
+                candidateTitleBar.style.display = 'flex'; // Assuming we still show 'Candidates' title
+                reviewListContainer.style.display = 'block';
+                masterViewReviewBtn.classList.add('active');
+            } else if (view === 'jobs') {
+                jobTitleBar.style.display = 'flex';
+                jobListContainer.style.display = 'block';
+                masterViewJobsBtn.classList.add('active');
             }
 
-            masterViewCandidatesBtn.classList.toggle('active', showCandidates);
-            masterViewJobsBtn.classList.toggle('active', !showCandidates);
-            renderJobsView(); // Re-render to clear selection state
-            renderListView(); // Re-render to clear selection state
+            renderJobsView();
+            renderListView();
+            renderReviewView();
         }
 
-        masterViewCandidatesBtn.addEventListener('click', () => toggleMainView(true));
-        masterViewJobsBtn.addEventListener('click', () => toggleMainView(false));
+        let reviewCandidatesData = [
+            { id: 6, name: 'Michael Brown', jobTitle: 'Senior Python Developer', interviewDate: '2025-09-03', score: 91 },
+            { id: 7, name: 'Jessica Davis', jobTitle: 'Frontend Engineer', interviewDate: '2025-09-02', score: 89 },
+            { id: 8, name: 'William Wilson', jobTitle: 'Senior Python Developer', interviewDate: '2025-09-01', score: 85 },
+        ];
+
+        function renderReviewView(data = reviewCandidatesData) {
+            const tableBody = document.getElementById('review-table-body');
+            tableBody.innerHTML = '';
+            data.forEach(c => {
+                const row = document.createElement('tr');
+                row.style.borderBottom = '1px solid var(--border-color)';
+                row.innerHTML = `
+                    <td style="padding: 16px 20px;">
+                        <h4 style="font-weight: 600; font-size: 0.95rem;">${c.name}</h4>
+                    </td>
+                    <td style="padding: 16px 20px; color: var(--text-color-medium);">${c.jobTitle}</td>
+                    <td style="padding: 16px 20px; color: var(--text-color-medium);">${c.interviewDate}</td>
+                    <td style="padding: 16px 20px; font-weight: 600; color: var(--primary-color);">${c.score}%</td>
+                    <td style="padding: 16px 20px;">
+                        <a href="../Module6/AnalyticsDashboard.html" class="btn btn-primary">View Report</a>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        masterViewCandidatesBtn.addEventListener('click', () => toggleMainView('candidates'));
+        masterViewReviewBtn.addEventListener('click', () => toggleMainView('review'));
+        masterViewJobsBtn.addEventListener('click', () => toggleMainView('jobs'));
+
+        const reviewSearchInput = document.getElementById('review-search');
+        reviewSearchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredData = reviewCandidatesData.filter(c => c.name.toLowerCase().includes(searchTerm));
+            renderReviewView(filteredData);
+        });
+
+        const reviewTable = document.getElementById('review-table');
+        let sortDirection = { name: 'asc', job: 'asc', date: 'desc', score: 'desc' };
+
+        reviewTable.querySelector('thead').addEventListener('click', (e) => {
+            if (e.target.matches('th[data-sort]')) {
+                const sortKey = e.target.dataset.sort;
+                const direction = sortDirection[sortKey] === 'asc' ? 'desc' : 'asc';
+
+                // Reset directions for other columns
+                Object.keys(sortDirection).forEach(key => sortDirection[key] = 'asc');
+                sortDirection[sortKey] = direction;
+
+                const sortedData = [...reviewCandidatesData].sort((a, b) => {
+                    const valA = a[sortKey];
+                    const valB = b[sortKey];
+
+                    if (sortKey === 'score') {
+                        return direction === 'asc' ? valA - valB : valB - valA;
+                    }
+
+                    if (valA < valB) return direction === 'asc' ? -1 : 1;
+                    if (valA > valB) return direction === 'asc' ? 1 : -1;
+                    return 0;
+                });
+                renderReviewView(sortedData);
+            }
+        });
 
         // --- INITIALIZE ---
         renderAllViews();
-        toggleMainView(true); // Start on candidate view
+        toggleMainView('candidates'); // Start on candidate view
         setupModalTabs('create-job-modal');
         setupModalTabs('edit-job-modal');
         lucide.createIcons();
